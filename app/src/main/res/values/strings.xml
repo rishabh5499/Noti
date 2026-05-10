@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Noti</string>
+    <string name="add_task">"Add Task +"</string>
+    <string name="add_note">"Add Note +"</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="hi_x">Hi %1$s!</string>
+</resources>

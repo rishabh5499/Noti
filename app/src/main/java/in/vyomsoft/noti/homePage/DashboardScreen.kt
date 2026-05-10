@@ -1,0 +1,116 @@
+package `in`.vyomsoft.noti.homePage
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import `in`.vyomsoft.noti.DateDropdown
+import `in`.vyomsoft.noti.Footer
+import `in`.vyomsoft.noti.Header
+import `in`.vyomsoft.noti.apiUtils.Repository
+import `in`.vyomsoft.noti.notes.notesCards.NotesViewModel
+import `in`.vyomsoft.noti.notes.notesCards.NotesTabContent
+import `in`.vyomsoft.noti.notes.notesCards.NotesViewModelFactory
+import `in`.vyomsoft.noti.task.TaskTabContent
+import `in`.vyomsoft.noti.utils.constants.NoteAction
+
+@Composable
+fun DashboardScreen(
+    onNavigateToNoteEntry: (Long) -> Unit,
+    repository: Repository
+) {
+    val notesViewModel: NotesViewModel = viewModel(
+        factory = NotesViewModelFactory(repository)
+    )
+//    val tasksViewModel: TasksViewModel = viewModel(
+//        factory = TasksViewModelFactory(repository)
+//    )
+    val dashboardViewModel: DashboardViewModel = viewModel(
+        factory = DashboardViewModelFactory(repository)
+    )
+
+    var selectedTab by remember { mutableStateOf("Tasks") }
+    val pagerState = rememberPagerState(pageCount = { 2 })
+
+    // Sync Pager with Tab Clicks
+    LaunchedEffect(selectedTab) {
+        val targetPage = if (selectedTab == "Tasks") 0 else 1
+        pagerState.animateScrollToPage(targetPage)
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Header()
+        Column(modifier = Modifier.padding(16.dp)) {
+            ProfileSection(dashboardViewModel)
+            Spacer(modifier = Modifier.height(16.dp))
+            DateDropdown()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Tabs UI
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                listOf("Tasks", "Notes").forEach { tab ->
+                    Text(
+                        text = tab,
+                        modifier = Modifier.clickable { selectedTab = tab },
+                        fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+                        textDecoration = if (selectedTab == tab) TextDecoration.Underline else TextDecoration.None
+                    )
+                }
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f),
+            userScrollEnabled = false // Allows Task swipe-to-dismiss to work
+        ) { page ->
+            when (page) {
+                0 -> TaskTabContent(
+                    onNoteClick = { action, note ->
+                        val id = if (action == NoteAction.ADD) -1L else note?.id ?: -1L
+                        onNavigateToNoteEntry(id)
+                    }
+                )
+                1 -> NotesTabContent(
+                    viewModel = notesViewModel,
+                    onNoteClick = { action, note ->
+                        val id = if (action == NoteAction.ADD) -1L else note?.id ?: -1L
+                        onNavigateToNoteEntry(id)
+                    }
+                )
+            }
+        }
+        Footer()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboard() {
+//    DashboardScreen(
+//        userName = "John Doe",
+//        userEmail = "john@test.com",
+//        {}
+//    )
+}
