@@ -32,20 +32,24 @@ import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.notes.notesCards.NotesViewModel
 import `in`.vyomsoft.noti.notes.notesCards.NotesTabContent
 import `in`.vyomsoft.noti.notes.notesCards.NotesViewModelFactory
-import `in`.vyomsoft.noti.task.TaskTabContent
+import `in`.vyomsoft.noti.task.TasksCards.TaskTabContent
+import `in`.vyomsoft.noti.task.TasksCards.TasksViewModel
+import `in`.vyomsoft.noti.task.TasksCards.TasksViewModelFactory
 import `in`.vyomsoft.noti.utils.constants.NoteAction
 
 @Composable
 fun DashboardScreen(
     onNavigateToNoteEntry: (Long) -> Unit,
+    onNavigateToTaskEntry: (Long) -> Unit,
+    onNavigateToProfile: () -> Unit,
     repository: Repository
 ) {
     val notesViewModel: NotesViewModel = viewModel(
         factory = NotesViewModelFactory(repository)
     )
-//    val tasksViewModel: TasksViewModel = viewModel(
-//        factory = TasksViewModelFactory(repository)
-//    )
+    val tasksViewModel: TasksViewModel = viewModel(
+        factory = TasksViewModelFactory(repository)
+    )
     val dashboardViewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModelFactory(repository)
     )
@@ -60,11 +64,16 @@ fun DashboardScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        Header()
+        Header(
+            showProfile = true,
+            onProfileClick = onNavigateToProfile
+        )
         Column(modifier = Modifier.padding(16.dp)) {
             ProfileSection(dashboardViewModel)
             Spacer(modifier = Modifier.height(16.dp))
-            DateDropdown()
+            DateDropdown(selectedDate = {
+                tasksViewModel.loadFilteredGroups(it)
+            })
             Spacer(modifier = Modifier.height(16.dp))
 
             // Tabs UI
@@ -83,13 +92,14 @@ fun DashboardScreen(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f),
-            userScrollEnabled = false // Allows Task swipe-to-dismiss to work
+            userScrollEnabled = false
         ) { page ->
             when (page) {
                 0 -> TaskTabContent(
-                    onNoteClick = { action, note ->
-                        val id = if (action == NoteAction.ADD) -1L else note?.id ?: -1L
-                        onNavigateToNoteEntry(id)
+                    viewModel = tasksViewModel,
+                    onTaskClick = { action, task ->
+                        val id = if (action == NoteAction.ADD) -1L else task?.id ?: -1L
+                        onNavigateToTaskEntry(id)
                     }
                 )
                 1 -> NotesTabContent(

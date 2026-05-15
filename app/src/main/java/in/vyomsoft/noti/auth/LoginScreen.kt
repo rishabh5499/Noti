@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -90,11 +91,7 @@ class LoginScreen : ComponentActivity() {
 
     private fun observeViewModel() {
 
-        println("OBSERVE VIEWMODEL ATTACHED")
-
         loginViewModel.loginResult.observe(this) { response ->
-            println("LOGIN RESULT OBSERVED: $response")
-
             if (response != null) {
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
@@ -102,8 +99,6 @@ class LoginScreen : ComponentActivity() {
         }
 
         loginViewModel.error.observe(this) { error ->
-            println("LOGIN ERROR OBSERVED: $error")
-
             if (!error.isNullOrEmpty()) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
             }
@@ -116,6 +111,7 @@ fun LoginScreenUI(
     onLoginClick: (String, String) -> Unit = { _, _ -> },
     onRegisterClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -165,7 +161,11 @@ fun LoginScreenUI(
             text = "Forgot your password ?",
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(end = 40.dp, top = 12.dp),
+                .padding(end = 40.dp, top = 12.dp)
+                .clickable {
+                    val intent = Intent(context, ForgotPasswordActivity::class.java)
+                    context.startActivity(intent)
+                },
             style = TextStyle(
                 fontSize = 14.sp,
                 color = Color(0x80000000),
@@ -233,7 +233,6 @@ fun LoginTextField(
             Text(
                 placeholder,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W700,
                 fontFamily = inter

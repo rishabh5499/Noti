@@ -16,16 +16,19 @@ import `in`.vyomsoft.noti.responses.TodoResponse
 import `in`.vyomsoft.noti.responses.UserDetailsResponse
 import `in`.vyomsoft.noti.UserCacheManager
 import `in`.vyomsoft.noti.locker
+import `in`.vyomsoft.noti.requests.ResetPasswordRequest
 import `in`.vyomsoft.noti.utils.constants.AUTH_TOKEN
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Callback
 
 class Repository {
 //    val BASE_URL = "http://192.168.0.106:8080/"
 
-    val BASE_URL = "http://192.168.0.3:8080/"
+    val BASE_URL = "http://192.168.0.8:8080/"
     val URL_IMGBB = "https://api.imgbb.com"
 
     fun getRetrofitService(baseUrl: String): ApiUtils {
@@ -49,11 +52,32 @@ class Repository {
         return getRetrofitService(BASE_URL).performLogout("${UserCacheManager.get(AUTH_TOKEN)}")
     }
 
-    fun getAllTodos(): Call<List<TodoResponse>> {
-        return getRetrofitService(BASE_URL).getAllTodos("${UserCacheManager.get(AUTH_TOKEN)}")
+    fun getAllTodos(
+        page: Int = 0,
+        size: Int = 10
+    ): Call<List<TodoResponse>> {
+        return getRetrofitService(BASE_URL).getAllTodos(
+            token = "${UserCacheManager.get(AUTH_TOKEN)}",
+            pageNo = page,
+            pageSize = size,
+        )
     }
 
-    fun getTodo(todoId: String): Call<List<TodoResponse>> {
+    fun getAllTimeFilteredGroups(
+        page: Int = 0,
+        size: Int = 10,
+        date: String? = null
+    ): Call<List<TodoResponse>> {
+        val token = "${UserCacheManager.get(AUTH_TOKEN)}"
+        return getRetrofitService(BASE_URL).getAllTimeFilteredGroupsForUser(
+            token = token,
+            pageNo = page,
+            pageSize = size,
+            date = date
+        )
+    }
+
+    fun getTodo(todoId: Long): Call<TodoResponse> {
         return getRetrofitService(BASE_URL).getTodo("${UserCacheManager.get(AUTH_TOKEN)}", todoId)
     }
 
@@ -64,7 +88,7 @@ class Repository {
         )
     }
 
-    fun updateTodo(request: TodoRequest, todoId: String): Call<TodoResponse> {
+    fun updateTodo(request: TodoRequest, todoId: Long): Call<TodoResponse> {
         return getRetrofitService(BASE_URL).updateTodo(
             "${UserCacheManager.get(AUTH_TOKEN)}",
             todoId,
@@ -72,7 +96,7 @@ class Repository {
         )
     }
 
-    fun deleteTodo(todoId: String): Call<ResponseBody> {
+    fun deleteTodo(todoId: Long): Call<ResponseBody> {
         return getRetrofitService(BASE_URL).deleteTodo(
             "${UserCacheManager.get(AUTH_TOKEN)}",
             todoId
@@ -109,13 +133,23 @@ class Repository {
         )
     }
 
-    fun uploadImage(expiration: Int?, image: RequestBody): Call<ImgBBResponse> {
-        return getRetrofitService(URL_IMGBB).uploadImage(locker.imgeBBKey, expiration, image)
+    fun uploadImage(imagePart: MultipartBody.Part): Call<ResponseBody> {
+        val rawToken = UserCacheManager.get(AUTH_TOKEN).toString()
+        val formattedToken = if (rawToken.startsWith("Bearer ")) rawToken else "Bearer $rawToken"
+        return getRetrofitService(BASE_URL).uploadImage(formattedToken, imagePart)
     }
 
     fun getUserDetails(ipAddress: String): Call<UserDetailsResponse> {
         val token = "${UserCacheManager.get(AUTH_TOKEN)}"
         return getRetrofitService(BASE_URL).getUserDetails(token, ipAddress)
+    }
+
+    fun requestOtp(email: String, callback: Callback<ResponseBody>) {
+        getRetrofitService(BASE_URL).requestOtp(email).enqueue(callback)
+    }
+
+    fun resetPassword(request: ResetPasswordRequest, callback: Callback<ResponseBody>) {
+        getRetrofitService(BASE_URL).resetPassword(request).enqueue(callback)
     }
 
     fun updateUserDetails(request: UserDetailsResponse): Call<UserDetailsResponse> {

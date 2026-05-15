@@ -113,10 +113,6 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
         })
     }
 
-    fun setLoading() {
-        _uiState.value = NoteUiState.Loading
-    }
-
     fun resetState() {
         _uiState.value = NoteUiState.Idle
         _updatedNoteResult.value = null

@@ -14,6 +14,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 
 class AppUtils {
@@ -41,13 +42,51 @@ class AppUtils {
             if (isoString.isNullOrBlank()) return "Edited Today"
 
             return try {
-                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val date = inputFormat.parse(isoString)
-                val outputFormat = SimpleDateFormat("d MMMM, yyyy hh:mm a", Locale.getDefault())
-                date?.let { outputFormat.format(it) } ?: "Edited Today"
-            } catch (_: Exception) {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val date = inputFormat.parse(isoString) ?: return "Edited Today"
+
+                val now = Calendar.getInstance()
+                val target = Calendar.getInstance().apply { time = date }
+
+                when {
+                    isSameDay(now, target) -> "Edited Today"
+                    isYesterday(now, target) -> "Edited Yesterday"
+                    else -> {
+                        val outputFormat = SimpleDateFormat("d MMMM, yyyy", Locale.getDefault())
+                        outputFormat.format(date)
+                    }
+                }
+            } catch (e: Exception) {
                 "Edited Today"
             }
+        }
+
+        fun formatTaskDate(isoString: String?): String {
+            if (isoString.isNullOrBlank()) return "Edited Today"
+
+            return try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val date = inputFormat.parse(isoString) ?: return "Edited Today"
+
+                val now = Calendar.getInstance()
+                val target = Calendar.getInstance().apply { time = date }
+
+                val outputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                outputFormat.format(date)
+            } catch (e: Exception) {
+                "Edited Today"
+            }
+        }
+
+
+        private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
+            return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+        }
+
+        private fun isYesterday(now: Calendar, target: Calendar): Boolean {
+            val yesterday = (now.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -1) }
+            return isSameDay(yesterday, target)
         }
     }
 }

@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.okhttp.logging)
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.retrofit.v290)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

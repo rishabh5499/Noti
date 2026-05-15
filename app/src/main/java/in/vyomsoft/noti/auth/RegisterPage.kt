@@ -161,25 +161,25 @@ fun RegisterScreenUI(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            "Or".uppercase(),
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontWeight = FontWeight.W700,
-                color = Color(0x80000000)
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SocialCircleButton(iconRes = R.drawable.gmail, onClick = { /* Google Login */ })
-            SocialCircleButton(iconRes = R.drawable.apple, onClick = { /* Apple Login */ })
-            SocialCircleButton(iconRes = R.drawable.instagram, onClick = { /* Apple Login */ })
-        }
+//        Text(
+//            "Or".uppercase(),
+//            style = TextStyle(
+//                fontSize = 14.sp,
+//                fontWeight = FontWeight.W700,
+//                color = Color(0x80000000)
+//            )
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        Row(
+//            horizontalArrangement = Arrangement.spacedBy(16.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            SocialCircleButton(iconRes = R.drawable.gmail, onClick = { /* Google Login */ })
+//            SocialCircleButton(iconRes = R.drawable.apple, onClick = { /* Apple Login */ })
+//            SocialCircleButton(iconRes = R.drawable.instagram, onClick = { /* Apple Login */ })
+//        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

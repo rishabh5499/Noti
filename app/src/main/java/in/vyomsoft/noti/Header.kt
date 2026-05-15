@@ -1,10 +1,19 @@
 package `in`.vyomsoft.noti
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,15 +25,17 @@ import androidx.compose.ui.unit.sp
 import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
 
 @Composable
-fun Header() {
+fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .background(Color(0xFF434343)),
-        contentAlignment = Alignment.Center
+            .background(Color(0xFF434343))
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = "Noti",
                 style = TextStyle(
@@ -41,6 +52,29 @@ fun Header() {
                     color = Color.White
                 )
             )
+        }
+
+        if (showProfile) {
+            IconButton(
+                onClick = onProfileClick,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(16.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(36.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        tint = Color.White,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+            }
         }
     }
 }

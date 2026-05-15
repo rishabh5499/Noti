@@ -25,6 +25,8 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.*
+import `in`.vyomsoft.noti.responses.TodoResponse
+import `in`.vyomsoft.noti.utils.constants.NoteAction
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -32,24 +34,33 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DateDropdown() {
+fun DateDropdown(
+    selectedDate: (String) -> Unit
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     var currentDate by remember { mutableStateOf("") }
 
+    val apiFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val displayFormatter = remember { SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()) }
+
     LaunchedEffect(Unit) {
-        while (true) {
-            val calendar = Calendar.getInstance()
-            currentDate = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(calendar.time)
-            delay(1000 * 60)
-        }
+        val today = Calendar.getInstance().time
+        selectedDate(apiFormatter.format(today))
     }
 
     val selectedDateText = datePickerState.selectedDateMillis?.let {
         val date = java.util.Date(it)
-        val format = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
-        format.format(date)
-    } ?: currentDate
+        val apiDate = apiFormatter.format(date)
+
+        LaunchedEffect(apiDate) {
+            selectedDate(apiDate)
+        }
+
+        displayFormatter.format(date)
+    } ?: run {
+        displayFormatter.format(Calendar.getInstance().time)
+    }
 
     Surface(
         modifier = Modifier
@@ -62,10 +73,10 @@ fun DateDropdown() {
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.DateRange, null, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = selectedDateText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
+            Icon(Icons.Default.KeyboardArrowDown, null)
         }
     }
 
@@ -73,14 +84,10 @@ fun DateDropdown() {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("OK")
-                }
+                TextButton(onClick = { showDatePicker = false }) { Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
             }
         ) {
             DatePicker(state = datePickerState)

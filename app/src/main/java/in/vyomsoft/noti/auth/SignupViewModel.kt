@@ -44,29 +44,29 @@ class SignupViewModel(private val repository: Repository) : ViewModel() {
         })
     }
 
-    fun uploadToImgbb(context: Context, imageUri: Uri, note: SigninRequests) {
-        val base64 = AppUtils.encodeImageToBase64(context, imageUri) ?: return
-        val imageRequestBody = base64.toRequestBody("text/plain".toMediaType())
-        val call = repository.uploadImage(constants.IMAGE_EXPIRY, imageRequestBody)
-
-        call.enqueue(object : Callback<ImgBBResponse> {
-            override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
-                if (response.isSuccessful) {
-                    _imgBBResponse.postValue(response.body())
-                    val response = response.body()
-                    note.dpUrl = response?.data?.image?.url
-                    note.deleteUrl = response?.data?.deleteUrl
-                    performSignUp(note)
-                } else {
-                    _error.postValue("Image Upload failed}")
-                }
-            }
-
-            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
-                _error.postValue("Image Upload failed}")
-            }
-        })
-    }
+//    fun uploadToImgbb(context: Context, imageUri: Uri, note: SigninRequests) {
+//        val base64 = AppUtils.encodeImageToBase64(context, imageUri) ?: return
+//        val imageRequestBody = base64.toRequestBody("text/plain".toMediaType())
+//        val call = repository.uploadImage(constants.IMAGE_EXPIRY, imageRequestBody)
+//
+//        call.enqueue(object : Callback<ImgBBResponse> {
+//            override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
+//                if (response.isSuccessful) {
+//                    _imgBBResponse.postValue(response.body())
+//                    val response = response.body()
+//                    note.dpUrl = response?.data?.image?.url
+//                    note.deleteUrl = response?.data?.deleteUrl
+//                    performSignUp(note)
+//                } else {
+//                    _error.postValue("Image Upload failed}")
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
+//                _error.postValue("Image Upload failed}")
+//            }
+//        })
+//    }
 }
 
 class SignupViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

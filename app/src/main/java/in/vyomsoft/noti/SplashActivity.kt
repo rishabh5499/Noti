@@ -1,24 +1,34 @@
 package `in`.vyomsoft.noti
 
 import android.content.Intent
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.compose.ImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.auth.LandingPage
@@ -72,50 +82,36 @@ class SplashActivity : ComponentActivity() {
         }
     }
 }
-//class SplashActivity : ComponentActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//
-//        setContent {
-//            SplashScreenContent()
-//        }
-//
-//        lifecycleScope.launch {
-//            delay(200)
-//            startActivity(Intent(this@SplashActivity, LandingPage::class.java))
-//            finish()
-//        }
-//    }
-//}
 
 @Composable
 fun SplashScreenContent() {
+    val context = LocalContext.current
+
+    // Configure Coil to handle GIFs
+    val imageLoader = ImageLoader.Builder(context)
+        .components {
+            if (SDK_INT >= 28) {
+                add(ImageDecoderDecoder.Factory())
+            } else {
+                add(GifDecoder.Factory())
+            }
+        }
+        .build()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF434343)),
+            .background(Color(0xFF000000)),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Noti",
-                style = TextStyle(
-                    fontFamily = alegreyaScBold,
-                    fontSize = 96.sp,
-                    fontWeight = FontWeight.W700
-                ),
-                color = Color(0xB8FFFFFF)
-            )
-            Text(
-                text = "By   vyomsoft",
-                style = TextStyle(
-                    fontFamily = alegreyaScBold,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.W700
-                ),
-                color = Color.White
+            AsyncImage(
+                model = R.drawable.noti_splash,
+                contentDescription = "Loading Animation",
+                imageLoader = imageLoader,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

@@ -9,4 +9,5 @@ data class TodoResponse(
     @SerializedName("createdAt") var createdAt: String? = null,
     @SerializedName("completed") var completed: Boolean? = null,
     @SerializedName("reminder") var reminder: String? = null,
+    @SerializedName("subTasks") var subTasks: List<TodoResponse?> = emptyList(),
 )
