@@ -28,7 +28,7 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
 
     fun saveNote(title: String, content: String, noteId: Long? = -1L) {
         val request = NotesRequest(title, content)
-        if (noteId == -1L) {
+        if (noteId == -1L || noteId == 0L) {
             createNote(request)
         } else {
             updateNote(request, noteId.toString())

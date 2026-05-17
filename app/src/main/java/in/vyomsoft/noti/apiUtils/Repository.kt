@@ -28,7 +28,7 @@ import retrofit2.Callback
 class Repository {
 //    val BASE_URL = "http://192.168.0.106:8080/"
 
-    val BASE_URL = "http://192.168.0.8:8080/"
+    val BASE_URL = "https://noti.vyomsoft.in/"
     val URL_IMGBB = "https://api.imgbb.com"
 
     fun getRetrofitService(baseUrl: String): ApiUtils {

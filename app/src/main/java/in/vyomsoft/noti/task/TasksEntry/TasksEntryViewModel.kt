@@ -28,7 +28,7 @@ class TasksEntryViewModel(private val repository: Repository) : ViewModel() {
     val error: LiveData<String?> = _error
 
     fun saveTodo(request: TodoRequest, todoId: Long = -1L) {
-        if (todoId == -1L) {
+        if (todoId == -1L || todoId == 0L) {
             createTodo(request)
         } else {
             updateTodo(todoId, request)

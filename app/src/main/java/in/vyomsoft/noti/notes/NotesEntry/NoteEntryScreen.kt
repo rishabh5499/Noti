@@ -125,7 +125,7 @@ fun NoteEntryScreen(
                     TextButton(
                         onClick = {
                             if (title.isNotBlank() || content.isNotBlank()) {
-                                viewModel.saveNote(title, content, noteId.takeIf { isEditing })
+                                viewModel.saveNote(title, content, noteId.takeIf { isEditing } ?: 0L)
                             }
                         },
                         enabled = !isSaving && (title.isNotEmpty() || content.isNotEmpty())
@@ -136,7 +136,7 @@ fun NoteEntryScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            val title = if (title.isNotEmpty() || content.isNotEmpty()) "Update" else "Save"
+                            val title = if (noteId != -1L) "Update" else "Save"
                             Text(title, style = MaterialTheme.typography.labelLarge)
                         }
                     }

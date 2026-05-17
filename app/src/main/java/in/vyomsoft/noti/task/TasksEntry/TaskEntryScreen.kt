@@ -104,6 +104,12 @@ fun TaskEntryScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (updatedTodoResult == null && groupId.isBlank() && subTasks.isEmpty()) {
+            subTasks.add(TodoRequest(id = 0, name = "", completed = false))
+        }
+    }
+
     when (uiState) {
         is TodoUiState.Loading -> CircularProgressIndicator()
         is TodoUiState.Success -> {
@@ -202,13 +208,17 @@ fun TaskEntryScreen(
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     itemsIndexed(subTasks) { index, task ->
                         val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { value ->
-                                if (value == SwipeToDismissBoxValue.StartToEnd && task.name?.isNotBlank() == true) {
-                                    subTasks[index] = subTasks[index].copy(completed = !subTasks[index].completed)
-                                    false
-                                } else false
+                            confirmValueChange = {
+                                false
                             }
                         )
+
+                        LaunchedEffect(dismissState.targetValue) {
+                            if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd && task.name?.isNotBlank() == true) {
+                                subTasks[index] = subTasks[index].copy(completed = !subTasks[index].completed)
+                                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                            }
+                        }
 
                         SwipeToDismissBox(
                             state = dismissState,
@@ -219,7 +229,14 @@ fun TaskEntryScreen(
                                         dismissState.progress > 0.1f
 
                                 if (isSwiping) {
-                                    val color = if (task.completed) Color.Gray else Color.Green
+                                    // FIX: Remember the starting state based on whether the row is currently settled
+                                    val isInitiallyCompleted = remember(dismissState.currentValue == SwipeToDismissBoxValue.Settled) {
+                                        task.completed
+                                    }
+
+                                    val color = if (isInitiallyCompleted) Color.Gray else Color.Green
+                                    val label = if (isInitiallyCompleted) "Mark Incomplete" else "Mark Complete"
+
                                     Box(
                                         Modifier
                                             .fillMaxSize()
@@ -228,7 +245,7 @@ fun TaskEntryScreen(
                                         contentAlignment = Alignment.CenterStart
                                     ) {
                                         Text(
-                                            if (task.completed) "Mark Incomplete" else "Mark Complete",
+                                            text = label,
                                             color = Color.White,
                                             fontWeight = FontWeight.Bold
                                         )

@@ -54,6 +54,10 @@ fun DashboardScreen(
         factory = DashboardViewModelFactory(repository)
     )
 
+    val todayDateString = remember {
+        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+    }
+    var selectedDate by remember { mutableStateOf(todayDateString) }
     var selectedTab by remember { mutableStateOf("Tasks") }
     val pagerState = rememberPagerState(pageCount = { 2 })
 
@@ -61,6 +65,10 @@ fun DashboardScreen(
     LaunchedEffect(selectedTab) {
         val targetPage = if (selectedTab == "Tasks") 0 else 1
         pagerState.animateScrollToPage(targetPage)
+    }
+
+    LaunchedEffect(selectedDate) {
+        tasksViewModel.loadFilteredGroups(selectedDate, isRefresh = true)
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
@@ -71,8 +79,8 @@ fun DashboardScreen(
         Column(modifier = Modifier.padding(16.dp)) {
             ProfileSection(dashboardViewModel)
             Spacer(modifier = Modifier.height(16.dp))
-            DateDropdown(selectedDate = {
-                tasksViewModel.loadFilteredGroups(it)
+            DateDropdown(selectedDate = { date ->
+                selectedDate = date
             })
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,6 +105,7 @@ fun DashboardScreen(
             when (page) {
                 0 -> TaskTabContent(
                     viewModel = tasksViewModel,
+                    selectedDate = selectedDate, // FIX: Pass the state string as a key
                     onTaskClick = { action, task ->
                         val id = if (action == NoteAction.ADD) -1L else task?.id ?: -1L
                         onNavigateToTaskEntry(id)

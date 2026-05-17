@@ -38,10 +38,11 @@ import `in`.vyomsoft.noti.utils.constants.NoteAction
 @Composable
 fun TaskTabContent(
     viewModel: TasksViewModel,
+    selectedDate: String,
     onTaskClick: (NoteAction, TodoResponse?) -> Unit
 ) {
     LaunchedEffect(Unit) {
-//        viewModel.getAllTimeFilteredGroups()
+        viewModel.loadFilteredGroups(selectedDate, isRefresh = true)
     }
     val taskGroups by viewModel.todoResult.observeAsState(initial = emptyList())
 
