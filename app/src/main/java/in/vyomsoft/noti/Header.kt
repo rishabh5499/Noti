@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +38,7 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Noti",
+                text = stringResource(R.string.app_name),
                 style = TextStyle(
                     fontFamily = alegreyaScBold,
                     fontSize = 48.sp,
@@ -45,7 +46,7 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
                 )
             )
             Text(
-                text = "By   vyomsoft",
+                text = stringResource(R.string.by_vyomsoft),
                 style = TextStyle(
                     fontFamily = alegreyaScBold,
                     fontSize = 16.sp,
@@ -69,7 +70,7 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Profile",
+                        contentDescription = stringResource(R.string.profile),
                         tint = Color.White,
                         modifier = Modifier.padding(6.dp)
                     )

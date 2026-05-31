@@ -77,7 +77,7 @@ fun DashboardScreen(
             onProfileClick = onNavigateToProfile
         )
         Column(modifier = Modifier.padding(16.dp)) {
-            ProfileSection(dashboardViewModel)
+            ProfileSection(dashboardViewModel, onNavigateToProfile)
             Spacer(modifier = Modifier.height(16.dp))
             DateDropdown(selectedDate = { date ->
                 selectedDate = date

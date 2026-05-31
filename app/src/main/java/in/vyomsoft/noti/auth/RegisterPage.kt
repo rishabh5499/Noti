@@ -1,9 +1,7 @@
 package `in`.vyomsoft.noti.auth
 
 import android.content.Intent
-import `in`.vyomsoft.noti.R
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,7 +44,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,28 +51,44 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import `in`.vyomsoft.noti.Footer
 import `in`.vyomsoft.noti.Header
-import `in`.vyomsoft.noti.Utils.Companion.inter
+import `in`.vyomsoft.noti.HomeActivity
 import `in`.vyomsoft.noti.apiUtils.Repository
+import `in`.vyomsoft.noti.auth.LoginScreen
+import `in`.vyomsoft.noti.auth.LoginViewModel
+import `in`.vyomsoft.noti.auth.LoginViewModelFactory
+import `in`.vyomsoft.noti.auth.SignupUiState
+import `in`.vyomsoft.noti.auth.SignupViewModel
+import `in`.vyomsoft.noti.auth.SignupViewModelFactory
+import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.requests.SigninRequests
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
+import `in`.vyomsoft.noti.utils.AlertDialog
+import `in`.vyomsoft.noti.utils.AlertDialogState
+import `in`.vyomsoft.noti.utils.AlertMessageType
 
 class RegisterPage: ComponentActivity() {
     private lateinit var signupViewModel: SignupViewModel
+    private lateinit var loginViewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         val repository = Repository()
-        val factory = SignupViewModelFactory(repository)
 
-        signupViewModel = ViewModelProvider(this, factory).get(SignupViewModel::class.java)
+        val signupFactory = SignupViewModelFactory(repository)
+        signupViewModel = ViewModelProvider(this, signupFactory).get(SignupViewModel::class.java)
+
+        val loginFactory = LoginViewModelFactory(repository)
+        loginViewModel = ViewModelProvider(this, loginFactory).get(LoginViewModel::class.java)
+        observeLoginState()
 
         setContent {
             NotiTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         RegisterScreenUI(
+                            viewModel = signupViewModel,
                             onLoginClick = {
                                 startActivity(Intent(this@RegisterPage, LoginScreen::class.java))
                                 finish()
@@ -87,6 +100,10 @@ class RegisterPage: ComponentActivity() {
                                     val request = SigninRequests(name, username, email, password)
                                     signupViewModel.performSignUp(request)
                                 }
+                            },
+                            onRegistrationSuccess = { loginCredentials ->
+                                // Auto login sequentially with captured email & password combinations
+                                loginViewModel.performLogin(loginCredentials)
                             }
                         )
                     }
@@ -94,17 +111,75 @@ class RegisterPage: ComponentActivity() {
             }
         }
     }
+
+    private fun observeLoginState() {
+        loginViewModel.loginResult.observe(this) { response ->
+            if (response != null) {
+                Toast.makeText(this, "Logging in automatically...", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this@RegisterPage, HomeActivity::class.java))
+                finish()
+            }
+        }
+
+        loginViewModel.error.observe(this) { errorMessage ->
+            if (!errorMessage.isNullOrEmpty()) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 }
 
 @Composable
 fun RegisterScreenUI(
+    viewModel: SignupViewModel,
     onLoginClick: () -> Unit = {},
-    onRegisterClick: (String, String, String, String) -> Unit = { _, _, _, _ -> }
+    onRegisterClick: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    onRegistrationSuccess: (LoginRequests) -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val currentUiState by viewModel.uiState.observeAsState(SignupUiState.Idle)
+    var dialogState by remember { mutableStateOf(AlertDialogState()) }
+
+    when (val state = currentUiState) {
+        is SignupUiState.Success -> {
+            dialogState = AlertDialogState(
+                isOpen = true,
+                title = "Success!",
+                message = state.message,
+                type = AlertMessageType.SUCCESS,
+                positiveButtonText = "Continue",
+                onPositiveClick = {
+                    viewModel.resetUiState()
+                    // Capture data states safely from remember scopes inside this execution block
+                    val credentials = LoginRequests(email, password)
+                    onRegistrationSuccess(credentials)
+                }
+            )
+        }
+        is SignupUiState.Error -> {
+            dialogState = AlertDialogState(
+                isOpen = true,
+                title = state.title,
+                message = state.message,
+                type = AlertMessageType.ERROR,
+                positiveButtonText = "Dismiss",
+                onPositiveClick = { viewModel.resetUiState() }
+            )
+        }
+        else -> {}
+    }
+
+    AlertDialog(
+        state = dialogState,
+        onDismissRequest = {
+            dialogState = dialogState.copy(isOpen = false)
+            viewModel.resetUiState()
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -161,28 +236,6 @@ fun RegisterScreenUI(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-//        Text(
-//            "Or".uppercase(),
-//            style = TextStyle(
-//                fontSize = 14.sp,
-//                fontWeight = FontWeight.W700,
-//                color = Color(0x80000000)
-//            )
-//        )
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        Row(
-//            horizontalArrangement = Arrangement.spacedBy(16.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            SocialCircleButton(iconRes = R.drawable.gmail, onClick = { /* Google Login */ })
-//            SocialCircleButton(iconRes = R.drawable.apple, onClick = { /* Apple Login */ })
-//            SocialCircleButton(iconRes = R.drawable.instagram, onClick = { /* Apple Login */ })
-//        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Row(
             modifier = Modifier.clickable { onLoginClick() },
         ) {
@@ -228,10 +281,8 @@ fun RegisterTextField(
                 placeholder,
                 color = Color(0x80000000),
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.W700,
-                fontFamily = inter
+                fontWeight = FontWeight.W700
             )
         },
         modifier = Modifier.width(280.dp).height(55.dp),
@@ -263,5 +314,5 @@ fun SocialCircleButton(iconRes: Int, onClick: () -> Unit) {
 @Preview
 @Composable
 fun previewRegister() {
-    RegisterScreenUI()
+//    RegisterScreenUI()
 }

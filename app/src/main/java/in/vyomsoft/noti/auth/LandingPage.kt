@@ -45,6 +45,10 @@ import `in`.vyomsoft.noti.UserCacheManager
 import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.utils.constants.AUTH_TOKEN
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 
 class LandingPage : ComponentActivity() {
     private lateinit var loginViewModel: LoginViewModel
@@ -88,10 +92,14 @@ fun LandingScreen(
     onLoginClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {}
 ) {
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFDEBABB)),
+            .background(Color(0xFFDEBABB))
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -103,7 +111,7 @@ fun LandingScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Noti",
+                    text = stringResource(R.string.app_name),
                     style = TextStyle(
                         fontFamily = alegreyaScBold,
                         fontSize = 48.sp,
@@ -111,7 +119,7 @@ fun LandingScreen(
                     )
                 )
                 Text(
-                    text = "By   vyomsoft",
+                    text = stringResource(R.string.by_vyomsoft),
                     style = TextStyle(
                         fontFamily = alegreyaScBold,
                         fontSize = 16.sp,
@@ -121,10 +129,10 @@ fun LandingScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(80.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Why NOTI?",
+            text = stringResource(R.string.why_noti),
             style = TextStyle(
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Black,
@@ -135,7 +143,7 @@ fun LandingScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Noti is a complete productivity hub that lets\nyou take notes, organize to-do lists, and manage\neverything you need—all in one place.",
+            text = stringResource(R.string.noti_description),
             textAlign = TextAlign.Center,
             style = TextStyle(
                 fontSize = 14.sp,
@@ -146,7 +154,7 @@ fun LandingScreen(
             modifier = Modifier.padding(horizontal = 40.dp)
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Button(
             onClick = onLoginClick,
@@ -154,11 +162,11 @@ fun LandingScreen(
                 .width(160.dp)
                 .height(55.dp)
                 .border(1.dp, Color.Black, RoundedCornerShape(12.dp)),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5C1C1)), // Tinted button
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5C1C1)),
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text("LOGIN", color = Color(0xFF434343), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.login).uppercase(), color = Color(0xFF434343), fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -171,22 +179,24 @@ fun LandingScreen(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF434343)),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("REGISTER", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.register).uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Need Help?",
+            text = stringResource(R.string.need_help),
             style = TextStyle(
                 fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline,
                 color = Color(0xFF434343)
             ),
-            modifier = Modifier.clickable { /* Handle Help */ }
+            modifier = Modifier.clickable {
+                context.startActivity(Intent(context, HelpActivity::class.java))
+            }
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Box(
             modifier = Modifier.fillMaxWidth(),

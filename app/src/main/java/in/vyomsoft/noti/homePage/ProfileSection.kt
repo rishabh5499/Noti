@@ -1,6 +1,7 @@
 package `in`.vyomsoft.noti.homePage
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,8 @@ import java.util.Locale
 
 @Composable
 fun ProfileSection(
-    dashboardViewModel: DashboardViewModel
+    dashboardViewModel: DashboardViewModel,
+    onProfileClick: () -> Unit = {}
 ) {
     var currentTime by remember { mutableStateOf("") }
     val userDetails by dashboardViewModel.userDetail.observeAsState()
@@ -60,12 +62,13 @@ fun ProfileSection(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = userDetails?.dpUrl,
+                model = userDetails?.dpUrl ?: R.drawable.ic_launcher_foreground,
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray),
+                    .background(Color.LightGray)
+                    .clickable { onProfileClick() },
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_user)
             )
