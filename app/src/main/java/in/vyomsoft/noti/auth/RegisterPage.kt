@@ -115,7 +115,6 @@ class RegisterPage: ComponentActivity() {
     private fun observeLoginState() {
         loginViewModel.loginResult.observe(this) { response ->
             if (response != null) {
-                Toast.makeText(this, "Logging in automatically...", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@RegisterPage, HomeActivity::class.java))
                 finish()
             }
