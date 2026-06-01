@@ -7,12 +7,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.gson.Gson
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.requests.SigninRequests
 import `in`.vyomsoft.noti.responses.ImgBBResponse
 import `in`.vyomsoft.noti.UserCacheManager
+import `in`.vyomsoft.noti.requests.LoginRequests
+import `in`.vyomsoft.noti.responses.ErrorResponse
+import `in`.vyomsoft.noti.responses.LoginResponse
 import `in`.vyomsoft.noti.utils.AppUtils
 import `in`.vyomsoft.noti.utils.constants
+import `in`.vyomsoft.noti.utils.constants.AUTH_TOKEN
+import `in`.vyomsoft.noti.utils.constants.BEARER
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
@@ -20,53 +26,117 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SignupViewModel(private val repository: Repository) : ViewModel() {
-    private val _signupResult = MutableLiveData<ResponseBody?>()
-    val signupResult: LiveData<ResponseBody?> = _signupResult
+sealed interface SignupUiState {
+    object Idle : SignupUiState
+    object Loading : SignupUiState
+    data class Success(val message: String) : SignupUiState
+    data class Error(val title: String, val message: String) : SignupUiState
+}
 
-    private val _imgBBResponse = MutableLiveData<ImgBBResponse>()
-    val imgBBResponse: LiveData<ImgBBResponse> = _imgBBResponse
+class SignupViewModel(private val repository: Repository) : ViewModel() {
+
+    private val _signupResult = MutableLiveData<LoginResponse?>()
+    val signupResult: LiveData<LoginResponse?> = _signupResult
+    private val _uiState = MutableLiveData<SignupUiState>(SignupUiState.Idle)
+    val uiState: LiveData<SignupUiState> = _uiState
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
     fun performSignUp(request: SigninRequests) {
+        _uiState.postValue(SignupUiState.Loading)
+
+        // Changed the expected callback type to ResponseBody to prevent Gson from crashing on raw strings
         repository.performSignUp(request).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    _signupResult.postValue(response.body())
+                    // Read the successful body as a plain string safely
+                    val rawResponseString = response.body()?.string()
+                    Log.d("Signup", "Success Response: $rawResponseString")
+                    Log.d(BEARER, "$BEARER$rawResponseString")
+                    UserCacheManager.put(AUTH_TOKEN, "$BEARER$rawResponseString")
+                    _uiState.postValue(SignupUiState.Success("Account registered successfully!"))
+                } else {
+                    val errorMessage = try {
+                        val errorBodyString = response.errorBody()?.string()
+                        val errorResponse = Gson().fromJson(errorBodyString, ErrorResponse::class.java)
+                        errorResponse.message
+                    } catch (e: Exception) {
+                        "An unexpected error occurred"
+                    }
+
+                    _error.postValue(errorMessage)
+                    val title = if (response.code() == 409) "Conflict Error" else "Registration Error"
+                    _uiState.postValue(SignupUiState.Error(title, errorMessage))
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("Signup", "Error: ${t.message}")
+                // Handles the network error display gracefully in your custom alert dialog box
+                _uiState.postValue(SignupUiState.Error("Network Failure", t.localizedMessage ?: "Cannot connect to server"))
+            }
+        })
+    }
+//    fun performSignUp(request: SigninRequests) {
+//        _uiState.postValue(SignupUiState.Loading)
+//
+//        repository.performSignUp(request).enqueue(object : Callback<LoginResponse> {
+//            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+//                if (response.isSuccessful) {
+//                    _signupResult.value = (response.body())
+//                    val token = response.body()
+//                    Log.d(BEARER, "$BEARER$token")
+//                    UserCacheManager.put(AUTH_TOKEN, "$BEARER$token")
+//                    _uiState.postValue(SignupUiState.Success("Account registered successfully!"))
+//                } else {
+//                    val errorMessage = try {
+//                        val errorBodyString = response.errorBody()?.string()
+//                        val errorResponse = Gson().fromJson(errorBodyString, ErrorResponse::class.java)
+//                        errorResponse.message
+//                    } catch (e: Exception) {
+//                        "An unexpected error occurred"
+//                    }
+//
+//                    _error.postValue(errorMessage)
+//                    val title = if (response.code() == 409) "Conflict Error" else "Registration Error"
+//                    _uiState.postValue(SignupUiState.Error(title, errorMessage))
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+//                Log.e("Signup", "Error: ${t.message}")
+//                _uiState.postValue(SignupUiState.Error("Network Failure", t.localizedMessage ?: "Cannot connect to server"))
+//            }
+//        })
+//    }
+
+    fun performLogin(request: LoginRequests) {
+        repository.performLogin(request).enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(
+                call: Call<LoginResponse>,
+                response: Response<LoginResponse>
+            ) {
+                if (response.isSuccessful) {
+                    _signupResult.value = (response.body())
+                    val token = response.body()?.accessToken
+                    Log.d(BEARER, "$BEARER$token")
+                    UserCacheManager.put(AUTH_TOKEN, "$BEARER$token")
+                } else {
+                    _error.postValue("Login failed: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                _error.postValue("Error: ${t.message}")
             }
         })
     }
 
-//    fun uploadToImgbb(context: Context, imageUri: Uri, note: SigninRequests) {
-//        val base64 = AppUtils.encodeImageToBase64(context, imageUri) ?: return
-//        val imageRequestBody = base64.toRequestBody("text/plain".toMediaType())
-//        val call = repository.uploadImage(constants.IMAGE_EXPIRY, imageRequestBody)
-//
-//        call.enqueue(object : Callback<ImgBBResponse> {
-//            override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
-//                if (response.isSuccessful) {
-//                    _imgBBResponse.postValue(response.body())
-//                    val response = response.body()
-//                    note.dpUrl = response?.data?.image?.url
-//                    note.deleteUrl = response?.data?.deleteUrl
-//                    performSignUp(note)
-//                } else {
-//                    _error.postValue("Image Upload failed}")
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
-//                _error.postValue("Image Upload failed}")
-//            }
-//        })
-//    }
+    // Helper to clear the state back to idle once the dialog is closed
+    fun resetUiState() {
+        _uiState.postValue(SignupUiState.Idle)
+    }
 }
 
 class SignupViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

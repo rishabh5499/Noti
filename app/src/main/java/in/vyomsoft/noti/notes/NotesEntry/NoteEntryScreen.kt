@@ -1,46 +1,23 @@
 package `in`.vyomsoft.noti.notes.NotesEntry
 
-import android.os.Build
-import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import NoteUiState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import `in`.vyomsoft.noti.utils.AlertDialog
+import `in`.vyomsoft.noti.utils.AlertDialogState
+import `in`.vyomsoft.noti.utils.AlertMessageType
 import `in`.vyomsoft.noti.utils.AppUtils.Companion.formatNoteDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,52 +29,70 @@ fun NoteEntryScreen(
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var createdAt by remember { mutableStateOf("") }
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
     val updatedNoteResult by viewModel.updatedNoteResult.collectAsState()
+
+    var dialogState by remember { mutableStateOf(AlertDialogState()) }
 
     LaunchedEffect(updatedNoteResult) {
         updatedNoteResult?.let {
             title = it.title ?: ""
             content = it.description ?: ""
-            createdAt = formatNoteDate(it.createdAt).takeIf { it.isNullOrBlank().not() } ?: "Edited Today"
+            createdAt = formatNoteDate(it.createdAt).takeIf { !it.isNullOrBlank() } ?: "Edited Today"
         }
     }
 
     val noteId = updatedNoteResult?.id ?: -1L
-    when (uiState) {
-        is NoteUiState.Loading -> CircularProgressIndicator()
+
+    // UI state mapper to drive your beautiful custom alert dialog
+    when (val state = uiState) {
         is NoteUiState.Success -> {
-            onNavigateBack()
-            viewModel.resetState()
-        }
-        is NoteUiState.Error -> Toast.makeText(
-            LocalContext.current,
-            (uiState as NoteUiState.Error).message,
-            Toast.LENGTH_SHORT
-        )
-        is NoteUiState.Delete -> {
-            AlertDialog(
-                onDismissRequest = { },
-                title = { Text("Delete Note?") },
-                text = { Text("This action cannot be undone.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        viewModel.deleteNote(noteId.toString())
-                    }) {
-                        Text("Delete", color = Color.Red)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Cancel")
-                    }
+            dialogState = AlertDialogState(
+                isOpen = true,
+                title = "Success!",
+                message = state.message,
+                type = AlertMessageType.SUCCESS,
+                positiveButtonText = "Done",
+                onPositiveClick = {
+                    viewModel.resetState()
+                    onNavigateBack() // Pop back to directory list only after dismissing success confirmation
                 }
             )
         }
-        else -> { }
+        is NoteUiState.Error -> {
+            dialogState = AlertDialogState(
+                isOpen = true,
+                title = state.title,
+                message = state.message,
+                type = AlertMessageType.ERROR,
+                positiveButtonText = "Dismiss",
+                onPositiveClick = { viewModel.resetState() }
+            )
+        }
+        is NoteUiState.Delete -> {
+            dialogState = AlertDialogState(
+                isOpen = true,
+                title = "Delete Note?",
+                message = "This action cannot be undone.",
+                type = AlertMessageType.ERROR,
+                positiveButtonText = "Delete",
+                negativeButtonText = "Cancel",
+                onPositiveClick = { viewModel.deleteNote(noteId.toString()) },
+                onNegativeClick = { viewModel.resetState() }
+            )
+        }
+        else -> {}
     }
+
+    // Modern status dialog renderer
+    AlertDialog(
+        state = dialogState,
+        onDismissRequest = {
+            dialogState = dialogState.copy(isOpen = false)
+            viewModel.resetState()
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -136,8 +131,8 @@ fun NoteEntryScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            val title = if (noteId != -1L) "Update" else "Save"
-                            Text(title, style = MaterialTheme.typography.labelLarge)
+                            val btnLabel = if (noteId != -1L) "Update" else "Save"
+                            Text(btnLabel, style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -169,23 +164,16 @@ fun NoteEntryScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.LightGray,
-                    unfocusedPlaceholderColor = Color.LightGray
+                    unfocusedIndicatorColor = Color.Transparent
                 ),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // OPTIONAL: TIMESTAMP (Matches the "Contextual" requirement in Confluence)
             Text(
                 text = createdAt,
                 style = MaterialTheme.typography.bodySmall,
@@ -195,7 +183,6 @@ fun NoteEntryScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // CONTENT / BODY FIELD
             TextField(
                 value = content,
                 onValueChange = { content = it },
@@ -208,21 +195,13 @@ fun NoteEntryScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f), // Takes up remaining space
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    lineHeight = 28.sp // Increased line height for "low-anxiety" readability
-                ),
+                    .weight(1f),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.LightGray,
-                    unfocusedPlaceholderColor = Color.LightGray
+                    unfocusedIndicatorColor = Color.Transparent
                 )
             )
             Spacer(modifier = Modifier.imePadding())

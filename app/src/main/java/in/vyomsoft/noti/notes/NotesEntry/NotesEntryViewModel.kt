@@ -41,14 +41,14 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
             override fun onResponse(call: Call<NotesResponse>, response: Response<NotesResponse>) {
                 if (response.isSuccessful) {
                     _updatedNoteResult.value = response.body()
-                    _uiState.value = NoteUiState.Success
+                    _uiState.value = NoteUiState.Success("Note created successfully!")
                 } else {
-                    _uiState.value = NoteUiState.Error("Error Creating Note")
+                    _uiState.value = NoteUiState.Error("Creation Error", "Failed to save note to server.")
                 }
             }
 
             override fun onFailure(call: Call<NotesResponse>, t: Throwable) {
-                _uiState.value = NoteUiState.Error(t.message ?: "Failed to reach server")
+                _uiState.value = NoteUiState.Error("Network Failure", t.message ?: "Failed to reach server")
             }
         })
     }
@@ -58,15 +58,15 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
         repository.updateNote(note, noteId).enqueue(object : Callback<NotesResponse> {
             override fun onResponse(call: Call<NotesResponse>, response: Response<NotesResponse>) {
                 if (response.isSuccessful) {
-                    _uiState.value = NoteUiState.Success
                     _updatedNoteResult.value = response.body()
+                    _uiState.value = NoteUiState.Success("Note updated successfully!")
                 } else {
-                    _uiState.value = NoteUiState.Error("Error Updating Note")
+                    _uiState.value = NoteUiState.Error("Update Error", "Failed to save modifications.")
                 }
             }
 
             override fun onFailure(call: Call<NotesResponse>, t: Throwable) {
-                _uiState.value = NoteUiState.Error(t.message ?: "Update failed")
+                _uiState.value = NoteUiState.Error("Network Failure", t.message ?: "Update failed")
             }
         })
     }
@@ -74,10 +74,7 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
     fun getNote(noteId: String) {
         _uiState.value = NoteUiState.Loading
         repository.getNote(noteId).enqueue(object : Callback<NotesResponse> {
-            override fun onResponse(
-                call: Call<NotesResponse>,
-                response: Response<NotesResponse>
-            ) {
+            override fun onResponse(call: Call<NotesResponse>, response: Response<NotesResponse>) {
                 if (response.isSuccessful) {
                     _updatedNoteResult.value = response.body()
                     _uiState.value = NoteUiState.Ready
@@ -101,20 +98,19 @@ class NotesEntryViewModel(private val repository: Repository) : ViewModel() {
         repository.deleteNote(noteId).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    _uiState.value = NoteUiState.Success
+                    _uiState.value = NoteUiState.Success("Note deleted successfully!")
                 } else {
-                    _uiState.value = NoteUiState.Error("Delete failed")
+                    _uiState.value = NoteUiState.Error("Delete Error", "Could not complete drop event.")
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                _uiState.value = NoteUiState.Error("Delete failed")
+                _uiState.value = NoteUiState.Error("Delete Error", t.message ?: "Operation failed")
             }
         })
     }
 
     fun resetState() {
         _uiState.value = NoteUiState.Idle
-        _updatedNoteResult.value = null
     }
 }

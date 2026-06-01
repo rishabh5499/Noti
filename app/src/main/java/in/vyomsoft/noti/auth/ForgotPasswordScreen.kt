@@ -40,7 +40,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import `in`.vyomsoft.noti.R
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.homePage.DashboardViewModelFactory
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
@@ -97,7 +99,8 @@ fun ForgotPasswordScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (step == 1) "Forgot Password?" else "Verify Identity",
+                text = if (step == 1) stringResource(R.string.forgot_password) 
+                else stringResource(R.string.verify_identity),
                 style = TextStyle(fontSize = 28.sp)
             )
 
@@ -106,8 +109,8 @@ fun ForgotPasswordScreen(
             // Tone-consistent explanation
             Text(
                 text = if (step == 1)
-                    "Don't worry, it happens to the best of us. Enter your email and we'll shoot over a unique code to get you back in."
-                else "Check your inbox. We've sent a 6-digit code to $email. Enter it below along with your new credentials.",
+                    stringResource(R.string.forgot_password_desc)
+                else stringResource(R.string.password_sent_desc, email),
                 style = TextStyle(fontSize = 14.sp, color = Color.Gray),
                 textAlign = TextAlign.Center
             )
@@ -119,7 +122,7 @@ fun ForgotPasswordScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email Address") },
+                    label = { Text(stringResource(R.string.email_address)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -130,18 +133,20 @@ fun ForgotPasswordScreen(
                     onClick = {
                         viewModel.requestOtp(email) { step = 2 }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
                     enabled = email.isNotEmpty() && (isLoading == false)
                 ) {
                     if (isLoading == true) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    else Text("Send OTP Code")
+                    else Text(stringResource(R.string.send_otp_code))
                 }
             } else {
                 // STEP 2: OTP & NEW PASSWORD
                 OutlinedTextField(
                     value = otp,
                     onValueChange = { if (it.length <= 6) otp = it },
-                    label = { Text("6-Digit Code") },
+                    label = { Text(stringResource(R.string._6_digit_code)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -152,7 +157,7 @@ fun ForgotPasswordScreen(
                 OutlinedTextField(
                     value = newPassword,
                     onValueChange = { newPassword = it },
-                    label = { Text("New Secure Password") },
+                    label = { Text(stringResource(R.string.new_secure_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -168,11 +173,13 @@ fun ForgotPasswordScreen(
                             onNavigateBack()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
                     enabled = otp.length == 6 && newPassword.length >= 6 && (isLoading == false)
                 ) {
                     if (isLoading == true) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    else Text("Reset & Login")
+                    else Text(stringResource(R.string.reset_login))
                 }
             }
 

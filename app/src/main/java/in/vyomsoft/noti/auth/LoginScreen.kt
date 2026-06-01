@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -46,6 +47,7 @@ import androidx.lifecycle.ViewModelProvider
 import `in`.vyomsoft.noti.Footer
 import `in`.vyomsoft.noti.Header
 import `in`.vyomsoft.noti.HomeActivity
+import `in`.vyomsoft.noti.R
 import `in`.vyomsoft.noti.Utils.Companion.inter
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.requests.LoginRequests
@@ -72,7 +74,10 @@ class LoginScreen : ComponentActivity() {
                         LoginScreenUI(
                             onLoginClick = { email, password ->
                                 if (email.isEmpty() || password.isEmpty()) {
-                                    Toast.makeText(this@LoginScreen, "Please enter details", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@LoginScreen,
+                                        getString(
+                                            R.string.please_enter_details
+                                    ), Toast.LENGTH_SHORT).show()
                                 } else {
                                     val request = LoginRequests(email, password)
                                     loginViewModel.performLogin(request)
@@ -126,7 +131,7 @@ fun LoginScreenUI(
         Spacer(modifier = Modifier.height(60.dp))
 
         Text(
-            text = "Welcome Back!",
+            text = stringResource(R.string.welcome_back),
             style = TextStyle(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.W700,
@@ -134,7 +139,7 @@ fun LoginScreenUI(
             )
         )
         Text(
-            text = "Sign in to continue",
+            text = stringResource(R.string.sign_in_to_continue),
             style = TextStyle(
                 fontSize = 13.sp,
                 color = Color(0x99000000),
@@ -147,7 +152,7 @@ fun LoginScreenUI(
         LoginTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = "User Name"
+            placeholder = stringResource(R.string.user_name)
         )
         Spacer(modifier = Modifier.height(16.dp))
         LoginTextField(
@@ -158,7 +163,7 @@ fun LoginScreenUI(
         )
 
         Text(
-            text = "Forgot your password ?",
+            text = stringResource(R.string.forgot_your_password),
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(end = 40.dp, top = 12.dp)
@@ -184,7 +189,7 @@ fun LoginScreenUI(
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                "Login",
+                text = stringResource(R.string.login_normal_case),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -196,7 +201,7 @@ fun LoginScreenUI(
             modifier = Modifier.clickable { onRegisterClick() }
         ) {
             Text(
-                "Don't have an account? ",
+                stringResource(R.string.don_t_have_an_account),
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.W700,
@@ -204,7 +209,7 @@ fun LoginScreenUI(
                 )
             )
             Text(
-                text = "Register Now",
+                text = stringResource(R.string.register_now),
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.W700
