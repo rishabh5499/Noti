@@ -51,12 +51,14 @@ class ForgotPasswordActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val emailFromIntent = intent.getStringExtra("email")
 
         enableEdgeToEdge()
 
         setContent {
             NotiTheme {
                 ForgotPasswordScreen(
+                    emailFromIntent,
                     onNavigateBack = {
                         finish()
                     }
@@ -68,6 +70,7 @@ class ForgotPasswordActivity : ComponentActivity() {
 
 @Composable
 fun ForgotPasswordScreen(
+    emailFromIntent: String?,
     onNavigateBack: () -> Unit
 ) {
     val repository = Repository()
@@ -75,7 +78,9 @@ fun ForgotPasswordScreen(
         factory = DashboardViewModelFactory(repository)
     )
     var step by remember { mutableIntStateOf(1) }
-    var email by remember { mutableStateOf("") }
+    var email by remember {
+        mutableStateOf(if (!emailFromIntent.isNullOrEmpty()) emailFromIntent else "")
+    }
     var otp by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
 

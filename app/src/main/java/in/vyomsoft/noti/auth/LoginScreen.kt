@@ -169,6 +169,7 @@ fun LoginScreenUI(
                 .padding(end = 40.dp, top = 12.dp)
                 .clickable {
                     val intent = Intent(context, ForgotPasswordActivity::class.java)
+                    intent.putExtra("email", email)
                     context.startActivity(intent)
                 },
             style = TextStyle(
