@@ -1,5 +1,6 @@
 package `in`.vyomsoft.noti.homePage
 
+import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import `in`.vyomsoft.noti.DateDropdown
 import `in`.vyomsoft.noti.Footer
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.Header
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.notes.notesCards.NotesViewModel
@@ -36,6 +38,8 @@ import `in`.vyomsoft.noti.task.TasksCards.TaskTabContent
 import `in`.vyomsoft.noti.task.TasksCards.TasksViewModel
 import `in`.vyomsoft.noti.task.TasksCards.TasksViewModelFactory
 import `in`.vyomsoft.noti.utils.constants.NoteAction
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(
@@ -55,7 +59,7 @@ fun DashboardScreen(
     )
 
     val todayDateString = remember {
-        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(java.util.Date())
     }
     var selectedDate by remember { mutableStateOf(todayDateString) }
     var selectedTab by remember { mutableStateOf("Tasks") }
@@ -65,6 +69,9 @@ fun DashboardScreen(
     LaunchedEffect(selectedTab) {
         val targetPage = if (selectedTab == "Tasks") 0 else 1
         pagerState.animateScrollToPage(targetPage)
+        AppAnalytics.logEvent("Dashboard_Tab_Click", Bundle().apply {
+            putString("tab", selectedTab)
+        })
     }
 
     LaunchedEffect(selectedDate) {

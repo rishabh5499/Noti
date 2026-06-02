@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.R
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -46,6 +47,7 @@ fun ProfileSection(
 
     LaunchedEffect(Unit) {
         dashboardViewModel.getUserDetails()
+        AppAnalytics.logEvent("Profile_Screen_View")
     }
 
     LaunchedEffect(Unit) {

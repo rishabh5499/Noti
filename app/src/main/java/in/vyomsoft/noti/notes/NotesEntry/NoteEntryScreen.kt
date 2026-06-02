@@ -1,6 +1,9 @@
 package `in`.vyomsoft.noti.notes.NotesEntry
 
 import NoteUiState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -33,7 +36,7 @@ fun NoteEntryScreen(
     val uiState by viewModel.uiState.collectAsState()
     val updatedNoteResult by viewModel.updatedNoteResult.collectAsState()
 
-    var dialogState by remember { mutableStateOf(AlertDialogState()) }
+    val isOnline by viewModel.isOnline.collectAsState()
 
     LaunchedEffect(updatedNoteResult) {
         updatedNoteResult?.let {
@@ -48,51 +51,51 @@ fun NoteEntryScreen(
     // UI state mapper to drive your beautiful custom alert dialog
     when (val state = uiState) {
         is NoteUiState.Success -> {
-            dialogState = AlertDialogState(
-                isOpen = true,
-                title = "Success!",
-                message = state.message,
-                type = AlertMessageType.SUCCESS,
-                positiveButtonText = "Done",
-                onPositiveClick = {
-                    viewModel.resetState()
-                    onNavigateBack() // Pop back to directory list only after dismissing success confirmation
-                }
+            AlertDialog(
+                state = AlertDialogState(
+                    isOpen = true,
+                    title = "Success!",
+                    message = state.message,
+                    type = AlertMessageType.SUCCESS,
+                    positiveButtonText = "Done",
+                    onPositiveClick = {
+                        viewModel.resetState()
+                        onNavigateBack()
+                    }
+                ),
+                onDismissRequest = { viewModel.resetState() }
             )
         }
         is NoteUiState.Error -> {
-            dialogState = AlertDialogState(
-                isOpen = true,
-                title = state.title,
-                message = state.message,
-                type = AlertMessageType.ERROR,
-                positiveButtonText = "Dismiss",
-                onPositiveClick = { viewModel.resetState() }
+            AlertDialog(
+                state = AlertDialogState(
+                    isOpen = true,
+                    title = state.title,
+                    message = state.message,
+                    type = AlertMessageType.ERROR,
+                    positiveButtonText = "Dismiss",
+                    onPositiveClick = { viewModel.resetState() }
+                ),
+                onDismissRequest = { viewModel.resetState() }
             )
         }
         is NoteUiState.Delete -> {
-            dialogState = AlertDialogState(
-                isOpen = true,
-                title = "Delete Note?",
-                message = "This action cannot be undone.",
-                type = AlertMessageType.ERROR,
-                positiveButtonText = "Delete",
-                negativeButtonText = "Cancel",
-                onPositiveClick = { viewModel.deleteNote(noteId.toString()) },
-                onNegativeClick = { viewModel.resetState() }
+            AlertDialog(
+                state = AlertDialogState(
+                    isOpen = true,
+                    title = "Delete Note?",
+                    message = "This action cannot be undone.",
+                    type = AlertMessageType.ERROR,
+                    positiveButtonText = "Delete",
+                    negativeButtonText = "Cancel",
+                    onPositiveClick = { viewModel.deleteNote(noteId.toString()) },
+                    onNegativeClick = { viewModel.resetState() }
+                ),
+                onDismissRequest = { viewModel.resetState() }
             )
         }
         else -> {}
     }
-
-    // Modern status dialog renderer
-    AlertDialog(
-        state = dialogState,
-        onDismissRequest = {
-            dialogState = dialogState.copy(isOpen = false)
-            viewModel.resetState()
-        }
-    )
 
     Scaffold(
         topBar = {
@@ -146,6 +149,28 @@ fun NoteEntryScreen(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            AnimatedVisibility(
+                visible = !isOnline,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "You're viewing this note offline. Changes cannot be synchronized right now.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(

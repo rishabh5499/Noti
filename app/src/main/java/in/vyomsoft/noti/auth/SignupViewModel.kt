@@ -2,12 +2,14 @@ package `in`.vyomsoft.noti.auth
 
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.requests.SigninRequests
 import `in`.vyomsoft.noti.responses.ImgBBResponse
@@ -56,6 +58,7 @@ class SignupViewModel(private val repository: Repository) : ViewModel() {
                     Log.d(BEARER, "$BEARER$rawResponseString")
                     UserCacheManager.put(AUTH_TOKEN, "$BEARER$rawResponseString")
                     _uiState.postValue(SignupUiState.Success("Account registered successfully!"))
+                    AppAnalytics.logEvent("Signup_Success")
                 } else {
                     val errorMessage = try {
                         val errorBodyString = response.errorBody()?.string()
@@ -67,49 +70,26 @@ class SignupViewModel(private val repository: Repository) : ViewModel() {
 
                     _error.postValue(errorMessage)
                     val title = if (response.code() == 409) "Conflict Error" else "Registration Error"
+                    val bundle = Bundle().apply {
+                        putString("error_message", errorMessage)
+                        putString("error_title", title)
+                    }
+                    AppAnalytics.logEvent("Signup_Failure", bundle)
                     _uiState.postValue(SignupUiState.Error(title, errorMessage))
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("Signup", "Error: ${t.message}")
+                val bundle = Bundle().apply {
+                    putString("error_message", t.message)
+                }
+                AppAnalytics.logEvent("Signup_Error", bundle)
                 // Handles the network error display gracefully in your custom alert dialog box
                 _uiState.postValue(SignupUiState.Error("Network Failure", t.localizedMessage ?: "Cannot connect to server"))
             }
         })
     }
-//    fun performSignUp(request: SigninRequests) {
-//        _uiState.postValue(SignupUiState.Loading)
-//
-//        repository.performSignUp(request).enqueue(object : Callback<LoginResponse> {
-//            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-//                if (response.isSuccessful) {
-//                    _signupResult.value = (response.body())
-//                    val token = response.body()
-//                    Log.d(BEARER, "$BEARER$token")
-//                    UserCacheManager.put(AUTH_TOKEN, "$BEARER$token")
-//                    _uiState.postValue(SignupUiState.Success("Account registered successfully!"))
-//                } else {
-//                    val errorMessage = try {
-//                        val errorBodyString = response.errorBody()?.string()
-//                        val errorResponse = Gson().fromJson(errorBodyString, ErrorResponse::class.java)
-//                        errorResponse.message
-//                    } catch (e: Exception) {
-//                        "An unexpected error occurred"
-//                    }
-//
-//                    _error.postValue(errorMessage)
-//                    val title = if (response.code() == 409) "Conflict Error" else "Registration Error"
-//                    _uiState.postValue(SignupUiState.Error(title, errorMessage))
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-//                Log.e("Signup", "Error: ${t.message}")
-//                _uiState.postValue(SignupUiState.Error("Network Failure", t.localizedMessage ?: "Cannot connect to server"))
-//            }
-//        })
-//    }
 
     fun performLogin(request: LoginRequests) {
         repository.performLogin(request).enqueue(object : Callback<LoginResponse> {

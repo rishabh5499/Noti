@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import `in`.vyomsoft.noti.Footer
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.Header
 import `in`.vyomsoft.noti.HomeActivity
 import `in`.vyomsoft.noti.R
@@ -60,10 +61,11 @@ class LoginScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val repository = Repository()
+        val repository = Repository(applicationContext)
         val factory = LoginViewModelFactory(repository)
 
         loginViewModel = ViewModelProvider(this, factory).get(LoginViewModel::class.java)
+        AppAnalytics.logScreenView("login_screen")
 
         observeViewModel()
 

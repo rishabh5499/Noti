@@ -2,6 +2,7 @@ package `in`.vyomsoft.noti.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,7 +27,7 @@ import `in`.vyomsoft.noti.task.TasksEntry.TasksEntryViewModelFactory
 @Composable
 fun NotiNavigation() {
     val navController = rememberNavController()
-    val repository = Repository()
+    val repository = Repository(LocalContext.current)
 
     NavHost(
         navController = navController,

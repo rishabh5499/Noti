@@ -21,7 +21,7 @@ class HomeActivity : ComponentActivity() {
 
         UserCacheManager.init(applicationContext)
 
-        val repository = Repository()
+        val repository = Repository(applicationContext)
         val factory = HomePageViewModelFactory(repository)
 
         homePageViewModel =

@@ -39,4 +39,25 @@
     <string name="don_t_have_an_account">"Don't have an account? "</string>
     <string name="register_now">Register Now</string>
     <string name="profile">Profile</string>
+    <string name="operation_failed">Operation Failed</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="delete_task_group">Delete Task Group?</string>
+    <string name="this_action_cannot_be_undone">This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="new_task_group">New Task Group</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="back">Back</string>
+    <string name="update_task_group">Update Task Group</string>
+    <string name="create_task_group">Create Task Group</string>
+    <string name="tasks_offline_desc">You\'re viewing your tasks offline. Changes cannot be synchronized right now.</string>
+    <string name="group_title">Group Title (e.g., Morning Routine)</string>
+    <string name="mark_incomplete">Mark Incomplete</string>
+    <string name="mark_complete">Mark Complete</string>
+    <string name="add_sub_task">Add sub-task...</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="check_your_wi_fi">Check your Wi-Fi or cellular data and try again.</string>
+    <string name="try_again">Try Again</string>
+    <string name="your_timeline_is_quiet">Your timeline is quiet</string>
+    <string name="organize_your_day_desc">Organize your day by adding tasks, subtasks, and quick targets to stay on track.</string>
+    <string name="create_your_first_task">Create your first task</string>
 </resources>

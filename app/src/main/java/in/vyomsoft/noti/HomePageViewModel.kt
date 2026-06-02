@@ -39,25 +39,6 @@ class HomePageViewModel(private val repository: Repository) : ViewModel() {
             }
         })
     }
-
-//    fun getUserDetails() {
-//        repository.getUserDetails().enqueue(object : Callback<UserDetailsResponse> {
-//            override fun onResponse(
-//                call: Call<UserDetailsResponse>,
-//                response: Response<UserDetailsResponse>
-//            ) {
-//                if (response.isSuccessful) {
-//                    _userDetails.postValue(response.body())
-//                } else {
-//                    _error.postValue("Error fetching todos")
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<UserDetailsResponse>, t: Throwable) {
-//                _error.postValue("Error fetching todos}")
-//            }
-//        })
-//    }
 }
 
 class HomePageViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

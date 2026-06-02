@@ -39,10 +39,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SplashActivity : ComponentActivity() {
-    private var repository: Repository = Repository()
+    private lateinit var repository: Repository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        repository = Repository(applicationContext)
 
         setContent {
             SplashScreenContent()

@@ -2,6 +2,7 @@ package `in`.vyomsoft.noti.homePage
 
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.compose.runtime.mutableStateListOf
@@ -9,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.UserCacheManager
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.requests.PasswordDetailsRequest
@@ -67,11 +69,16 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                     val rawText = response.body()?.string()
                     _loginResult.postValue(true)
                     UserCacheManager.clear()
+                    AppAnalytics.logEvent("user_logged_out")
                     Log.d("Signup", "Raw response: $rawText")
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("user_logged_out", bundle)
                 Log.e("Signup", "Error: ${t.message}")
             }
         })
@@ -86,14 +93,23 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
             ) {
                 if (response.isSuccessful) {
                     onSuccess()
+                    AppAnalytics.logEvent("password_updated")
                     _passwordChangeResult.postValue(response.body())
                 } else {
-                    _error.postValue("Error fetching todos")
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("password_update_failed", bundle)
+                    _error.postValue("Error updating password")
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                _error.postValue("Error fetching todos}")
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("password_update_failed", bundle)
+                _error.postValue("Update password failed")
             }
         })
     }
@@ -114,12 +130,24 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                     ) {
                         if (response.isSuccessful) {
                             _userDetails.postValue(response.body())
+                            val bundle = Bundle().apply {
+                                putString("user_id", response.body()?.id)
+                            }
+                            AppAnalytics.logEvent("user_details_fetched", bundle)
                         } else {
+                            val bundle = Bundle().apply {
+                                putString("error", response.message())
+                            }
+                            AppAnalytics.logEvent("user_details_fetch_error", bundle)
                             _error.postValue("Error fetching user details")
                         }
                     }
 
                     override fun onFailure(call: Call<UserDetailsResponse>, t: Throwable) {
+                        val bundle = Bundle().apply {
+                            putString("error", t.message)
+                        }
+                        AppAnalytics.logEvent("user_details_fetch_error", bundle)
                         _error.postValue("Network Failure: ${t.message}")
                     }
                 })
@@ -136,13 +164,22 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                 _loading.value = false
                 if (response.isSuccessful) {
                     onSuccess()
+                    AppAnalytics.logEvent("otp_requested")
                 } else {
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("otp_request_error", bundle)
                     _error.value = "Email not found or server error"
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 _loading.value = false
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("otp_request_failed", bundle)
                 _error.value = "Network failure: ${t.message}"
             }
         })
@@ -157,7 +194,12 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                 _loading.value = false
                 if (response.isSuccessful) {
                     onSuccess()
+                    AppAnalytics.logEvent("password_reset")
                 } else {
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("password_reset_error", bundle)
                     _error.value = "Invalid OTP or expired. Try again."
                 }
             }
@@ -165,6 +207,10 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 _loading.value = false
                 _error.value = "Network failure: ${t.message}"
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("password_reset_failed", bundle)
             }
         })
     }
@@ -196,12 +242,21 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                     user.dpUrl = s3Url
                     user.deleteUrl = null
                     updateUserDetails(user)
+                    AppAnalytics.logEvent("image_uploaded")
                 } else {
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("image_upload_error", bundle)
                     _error.postValue("Image Upload failed: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("image_upload_failed", bundle)
                 _error.postValue("Image Upload failed: ${t.message}")
             }
         })
@@ -215,13 +270,22 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
             ) {
                 if (response.isSuccessful) {
                     _userDetails.postValue(response.body())
+                    AppAnalytics.logEvent("user_details_updated")
                 } else {
-                    _error.postValue("Error fetching todos")
+                    _error.postValue("Error updating user details")
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("user_details_update_error", bundle)
                 }
             }
 
             override fun onFailure(call: Call<UserDetailsResponse>, t: Throwable) {
-                _error.postValue("Error fetching todos}")
+                _error.postValue("Error  updating user details")
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("user_details_update_failed", bundle)
             }
         })
     }
@@ -233,14 +297,26 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                 response: Response<PictureLimitResponse>
             ) {
                 if (response.isSuccessful) {
+                    val bundle = Bundle().apply {
+                        putString("limit", response.body()?.maxAllowedChanges.toString())
+                    }
+                    AppAnalytics.logEvent("picture_limit_fetched", bundle)
                     _pictureChangeLimit.postValue(response.body())
                 } else {
-                    _error.postValue("Error fetching todos")
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("picture_limit_fetch_error", bundle)
+                    _error.postValue("Error fetching limit")
                 }
             }
 
             override fun onFailure(call: Call<PictureLimitResponse>, t: Throwable) {
-                _error.postValue("Error fetching todos}")
+                val bundle = Bundle().apply {
+                    putString("error", t.message)
+                }
+                AppAnalytics.logEvent("picture_limit_fetch_failed", bundle)
+                _error.postValue("Error fetching limit")
             }
         })
     }

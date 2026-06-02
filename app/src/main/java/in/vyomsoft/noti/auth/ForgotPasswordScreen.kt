@@ -40,8 +40,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.R
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.homePage.DashboardViewModelFactory
@@ -57,6 +59,10 @@ class ForgotPasswordActivity : ComponentActivity() {
 
         setContent {
             NotiTheme {
+                val bundle = Bundle().apply {
+                    putString("email", emailFromIntent)
+                }
+                AppAnalytics.logEvent("forgot_password", bundle)
                 ForgotPasswordScreen(
                     emailFromIntent,
                     onNavigateBack = {
@@ -73,7 +79,7 @@ fun ForgotPasswordScreen(
     emailFromIntent: String?,
     onNavigateBack: () -> Unit
 ) {
-    val repository = Repository()
+    val repository = Repository(LocalContext.current)
     val viewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModelFactory(repository)
     )
