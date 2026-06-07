@@ -53,10 +53,14 @@ import `in`.vyomsoft.noti.Utils.Companion.inter
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
+import `in`.vyomsoft.noti.utils.AlertDialog
+import `in`.vyomsoft.noti.utils.AlertDialogState
+import `in`.vyomsoft.noti.utils.AlertMessageType
 import kotlin.jvm.java
 
 class LoginScreen : ComponentActivity() {
     private lateinit var loginViewModel: LoginViewModel
+    private var errorMessage by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,9 +81,8 @@ class LoginScreen : ComponentActivity() {
                             onLoginClick = { email, password ->
                                 if (email.isEmpty() || password.isEmpty()) {
                                     Toast.makeText(this@LoginScreen,
-                                        getString(
-                                            R.string.please_enter_details
-                                    ), Toast.LENGTH_SHORT).show()
+                                        getString(R.string.please_enter_details),
+                                        Toast.LENGTH_SHORT).show()
                                 } else {
                                     val request = LoginRequests(email, password)
                                     loginViewModel.performLogin(request)
@@ -90,6 +93,21 @@ class LoginScreen : ComponentActivity() {
                                 finish()
                             }
                         )
+
+                        errorMessage?.let { errorText ->
+                            val dialogState = AlertDialogState(
+                                isOpen = true,
+                                title = "Login Failed",
+                                message = errorText,
+                                type = AlertMessageType.ERROR,
+                                positiveButtonText = "Ok",
+                                onPositiveClick = { errorMessage = null },
+                            )
+                            AlertDialog(
+                                state = dialogState,
+                                onDismissRequest = { errorMessage = null }
+                            )
+                        }
                     }
                 }
             }
@@ -97,7 +115,6 @@ class LoginScreen : ComponentActivity() {
     }
 
     private fun observeViewModel() {
-
         loginViewModel.loginResult.observe(this) { response ->
             if (response != null) {
                 startActivity(Intent(this, HomeActivity::class.java))
@@ -107,7 +124,7 @@ class LoginScreen : ComponentActivity() {
 
         loginViewModel.error.observe(this) { error ->
             if (!error.isNullOrEmpty()) {
-                Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+                errorMessage = error
             }
         }
     }

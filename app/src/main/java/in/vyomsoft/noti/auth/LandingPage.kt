@@ -57,8 +57,11 @@ class LandingPage : ComponentActivity() {
         loginViewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
         AppAnalytics.logScreenView("landing_page")
 
-        checkLoginSession()
-
+        if (intent.getBooleanExtra("KEY_SESSION_EXPIRED", false)) {
+            isSessionExpired = true
+        } else {
+            checkLoginSession()
+        }
         setContent {
             NotiTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
