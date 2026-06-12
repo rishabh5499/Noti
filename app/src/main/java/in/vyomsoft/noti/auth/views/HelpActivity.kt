@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.auth
+package `in`.vyomsoft.noti.auth.views
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,12 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.R
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 
 class HelpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        AppAnalytics.logScreenView("help_screen")
         setContent {
             NotiTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -51,6 +54,7 @@ data class FaqItem(val questionRes: Int, val answerRes: Int)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelpScreen(onBackClick: () -> Unit) {
+    val color = AppTheme.colors
     val faqList = remember {
         listOf(
             FaqItem(R.string.what_is_noti, R.string.what_is_noti_desc),
@@ -63,17 +67,17 @@ fun HelpScreen(onBackClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFDEBABB))
+            .background(color.pink)
     ) {
         CenterAlignedTopAppBar(
-            title = { Text(stringResource(R.string.help_center), fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(stringResource(R.string.help_center), fontWeight = FontWeight.Bold, color = color.white) },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = color.white)
                 }
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xFF434343)
+                containerColor = color.primary
             )
         )
 
@@ -94,19 +98,19 @@ fun HelpScreen(onBackClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF434343)),
+                    colors = CardDefaults.cardColors(containerColor = color.white),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Still need assistance?", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Still need assistance?", color = color.white, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             stringResource(R.string.reach_our_engineering_team_at_vyomsoftmailer_gmail_com
                         ),
-                            color = Color(0xFFE5C1C1),
+                            color = color.pink,
                             fontSize = 13.sp
                         )
                     }
@@ -119,6 +123,7 @@ fun HelpScreen(onBackClick: () -> Unit) {
 
 @Composable
 fun FaqCard(faq: FaqItem) {
+    val color = AppTheme.colors
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -126,16 +131,16 @@ fun FaqCard(faq: FaqItem) {
             .fillMaxWidth()
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = color.white)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    // 3. Resolve the resource string inside the active UI pass
                     text = stringResource(id = faq.questionRes),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    color = color.primary
                 )
                 Icon(imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null)
             }

@@ -1,5 +1,8 @@
 package `in`.vyomsoft.noti.apiUtils
 
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.requests.PasswordDetailsRequest
 import `in`.vyomsoft.noti.requests.SigninRequests
@@ -15,25 +18,29 @@ import `in`.vyomsoft.noti.responses.PictureLimitResponse
 import `in`.vyomsoft.noti.responses.TodoResponse
 import `in`.vyomsoft.noti.responses.UserDetailsResponse
 import `in`.vyomsoft.noti.UserCacheManager
-import `in`.vyomsoft.noti.locker
 import `in`.vyomsoft.noti.requests.ResetPasswordRequest
 import `in`.vyomsoft.noti.utils.constants.AUTH_TOKEN
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Callback
 
-class Repository {
-//    val BASE_URL = "http://192.168.1.2:8080/"
+class Repository(val context: Context) {
 
+//    val BASE_URL = "http://192.168.0.6:8080/"
     val BASE_URL = "https://noti.vyomsoft.in/"
     val URL_IMGBB = "https://api.imgbb.com"
 
-    fun getRetrofitService(baseUrl: String): ApiUtils {
+    private fun getRetrofitService(): ApiUtils {
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(ConnectivityInterceptor(context))
+            .build()
+
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -41,35 +48,33 @@ class Repository {
     }
 
     fun performLogin(loginRequest: LoginRequests): Call<LoginResponse> {
-        return getRetrofitService(BASE_URL).performLogin(loginRequest)
+        return getRetrofitService().performLogin(loginRequest)
     }
 
     fun performSignUp(signinRequests: SigninRequests): Call<ResponseBody> {
-        return getRetrofitService(BASE_URL).performRegister(signinRequests)
+        return getRetrofitService().performRegister(signinRequests)
     }
 
     fun performLogout(): Call<ResponseBody> {
-        return getRetrofitService(BASE_URL).performLogout("${UserCacheManager.get(AUTH_TOKEN)}")
+        return getRetrofitService().performLogout("${UserCacheManager.get(AUTH_TOKEN)}")
     }
 
-    fun getAllTodos(
-        page: Int = 0,
-        size: Int = 10
-    ): Call<List<TodoResponse>> {
-        return getRetrofitService(BASE_URL).getAllTodos(
+    fun getAllTodos(page: Int = 0, size: Int = 10): Call<List<TodoResponse>> {
+        return getRetrofitService().getAllTodos(
             token = "${UserCacheManager.get(AUTH_TOKEN)}",
             pageNo = page,
             pageSize = size,
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllTimeFilteredGroups(
         page: Int = 0,
         size: Int = 10,
         date: String? = null
     ): Call<List<TodoResponse>> {
         val token = "${UserCacheManager.get(AUTH_TOKEN)}"
-        return getRetrofitService(BASE_URL).getAllTimeFilteredGroupsForUser(
+        return getRetrofitService().getAllTimeFilteredGroupsForUser(
             token = token,
             pageNo = page,
             pageSize = size,
@@ -78,18 +83,15 @@ class Repository {
     }
 
     fun getTodo(todoId: Long): Call<TodoResponse> {
-        return getRetrofitService(BASE_URL).getTodo("${UserCacheManager.get(AUTH_TOKEN)}", todoId)
+        return getRetrofitService().getTodo("${UserCacheManager.get(AUTH_TOKEN)}", todoId)
     }
 
     fun createTodo(request: TodoRequest): Call<TodoResponse> {
-        return getRetrofitService(BASE_URL).createTodo(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            request
-        )
+        return getRetrofitService().createTodo("${UserCacheManager.get(AUTH_TOKEN)}", request)
     }
 
     fun updateTodo(request: TodoRequest, todoId: Long): Call<TodoResponse> {
-        return getRetrofitService(BASE_URL).updateTodo(
+        return getRetrofitService().updateTodo(
             "${UserCacheManager.get(AUTH_TOKEN)}",
             todoId,
             request
@@ -97,77 +99,58 @@ class Repository {
     }
 
     fun deleteTodo(todoId: Long): Call<ResponseBody> {
-        return getRetrofitService(BASE_URL).deleteTodo(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            todoId
-        )
+        return getRetrofitService().deleteTodo("${UserCacheManager.get(AUTH_TOKEN)}", todoId)
     }
 
     fun getAllNotes(): Call<List<NotesResponse>> {
-        return getRetrofitService(BASE_URL).getAllNotes("${UserCacheManager.get(AUTH_TOKEN)}")
+        return getRetrofitService().getAllNotes("${UserCacheManager.get(AUTH_TOKEN)}")
     }
 
     fun getNote(id: String): Call<NotesResponse> {
-        return getRetrofitService(BASE_URL).getNote("${UserCacheManager.get(AUTH_TOKEN)}", id)
+        return getRetrofitService().getNote("${UserCacheManager.get(AUTH_TOKEN)}", id)
     }
 
     fun createNote(request: NotesRequest): Call<NotesResponse> {
-        return getRetrofitService(BASE_URL).createNote(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            request
-        )
+        return getRetrofitService().createNote("${UserCacheManager.get(AUTH_TOKEN)}", request)
     }
 
     fun updateNote(request: NotesRequest, noteId: String): Call<NotesResponse> {
-        return getRetrofitService(BASE_URL).updateNote(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            noteId,
-            request
-        )
+        return getRetrofitService().updateNote("${UserCacheManager.get(AUTH_TOKEN)}", noteId, request)
     }
 
     fun deleteNote(noteId: String): Call<ResponseBody> {
-        return getRetrofitService(BASE_URL).deleteNote(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            noteId
-        )
+        return getRetrofitService().deleteNote("${UserCacheManager.get(AUTH_TOKEN)}", noteId)
     }
 
     fun uploadImage(imagePart: MultipartBody.Part): Call<ResponseBody> {
         val rawToken = UserCacheManager.get(AUTH_TOKEN).toString()
         val formattedToken = if (rawToken.startsWith("Bearer ")) rawToken else "Bearer $rawToken"
-        return getRetrofitService(BASE_URL).uploadImage(formattedToken, imagePart)
+        return getRetrofitService().uploadImage(formattedToken, imagePart)
     }
 
     fun getUserDetails(ipAddress: String): Call<UserDetailsResponse> {
         val token = "${UserCacheManager.get(AUTH_TOKEN)}"
-        return getRetrofitService(BASE_URL).getUserDetails(token, ipAddress)
+        return getRetrofitService().getUserDetails(token, ipAddress)
     }
 
     fun requestOtp(email: String, callback: Callback<ResponseBody>) {
-        getRetrofitService(BASE_URL).requestOtp(email).enqueue(callback)
+        getRetrofitService().requestOtp(email).enqueue(callback)
     }
 
     fun resetPassword(request: ResetPasswordRequest, callback: Callback<ResponseBody>) {
-        getRetrofitService(BASE_URL).resetPassword(request).enqueue(callback)
+        getRetrofitService().resetPassword(request).enqueue(callback)
     }
 
     fun updateUserDetails(request: UserDetailsResponse): Call<UserDetailsResponse> {
-        return getRetrofitService(BASE_URL).updateUserDetails(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            request
-        )
+        return getRetrofitService().updateUserDetails("${UserCacheManager.get(AUTH_TOKEN)}", request)
     }
 
     fun updatePassword(request: PasswordDetailsRequest): Call<ResponseBody> {
-        return getRetrofitService(BASE_URL).updatePassword(
-            "${UserCacheManager.get(AUTH_TOKEN)}",
-            request
-        )
+        return getRetrofitService().updatePassword("${UserCacheManager.get(AUTH_TOKEN)}", request)
     }
 
     fun getPictureLimit(): Call<PictureLimitResponse> {
-        return getRetrofitService(BASE_URL).getPictureLimit("${UserCacheManager.get(AUTH_TOKEN)}")
+        return getRetrofitService().getPictureLimit("${UserCacheManager.get(AUTH_TOKEN)}")
     }
 
     suspend fun getPublicIp(): String? {

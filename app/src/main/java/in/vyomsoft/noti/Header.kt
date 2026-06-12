@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +25,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 
 @Composable
 fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
+    val color = AppTheme.colors
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .background(Color(0xFF434343))
+            .background(color.primary)
     ) {
         Column(
             modifier = Modifier.align(Alignment.Center),
@@ -42,7 +45,7 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
                 style = TextStyle(
                     fontFamily = alegreyaScBold,
                     fontSize = 48.sp,
-                    color = Color.White
+                    color = color.white
                 )
             )
             Text(
@@ -50,7 +53,7 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
                 style = TextStyle(
                     fontFamily = alegreyaScBold,
                     fontSize = 16.sp,
-                    color = Color.White
+                    color = color.white
                 )
             )
         }
@@ -65,13 +68,13 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
                 Surface(
                     modifier = Modifier.size(36.dp),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.2f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                    color = color.white.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, color.white.copy(alpha = 0.5f))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = stringResource(R.string.profile),
-                        tint = Color.White,
+                        tint = color.white,
                         modifier = Modifier.padding(6.dp)
                     )
                 }
@@ -82,10 +85,11 @@ fun Header(showProfile: Boolean = false, onProfileClick: () -> Unit = {}) {
 
 @Composable
 fun Footer() {
+    val color = AppTheme.colors
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .background(Color(0xFFE0E0E0))
+            .background(color.cardBorder)
     )
 }

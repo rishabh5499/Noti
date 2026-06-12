@@ -7,11 +7,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import `in`.vyomsoft.noti.apiUtils.Repository
 import `in`.vyomsoft.noti.responses.UserDetailsResponse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
+data class OutageUiState(
+    val isVisible: Boolean = false,
+    val message: String = ""
+)
 
 class HomePageViewModel(private val repository: Repository) : ViewModel() {
 
@@ -23,6 +30,13 @@ class HomePageViewModel(private val repository: Repository) : ViewModel() {
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
+
+    private val _outageState = MutableStateFlow(OutageUiState())
+    val outageState = _outageState.asStateFlow()
+
+    fun setOutageStatus(visible: Boolean, message: String) {
+        _outageState.value = OutageUiState(isVisible = visible, message = message)
+    }
 
     fun performLogout() {
         repository.performLogout().enqueue(object : Callback<ResponseBody> {
@@ -39,25 +53,6 @@ class HomePageViewModel(private val repository: Repository) : ViewModel() {
             }
         })
     }
-
-//    fun getUserDetails() {
-//        repository.getUserDetails().enqueue(object : Callback<UserDetailsResponse> {
-//            override fun onResponse(
-//                call: Call<UserDetailsResponse>,
-//                response: Response<UserDetailsResponse>
-//            ) {
-//                if (response.isSuccessful) {
-//                    _userDetails.postValue(response.body())
-//                } else {
-//                    _error.postValue("Error fetching todos")
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<UserDetailsResponse>, t: Throwable) {
-//                _error.postValue("Error fetching todos}")
-//            }
-//        })
-//    }
 }
 
 class HomePageViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

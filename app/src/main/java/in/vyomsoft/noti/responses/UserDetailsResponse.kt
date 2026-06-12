@@ -3,6 +3,7 @@ package `in`.vyomsoft.noti.responses
 import com.google.gson.annotations.SerializedName
 
 data class UserDetailsResponse(
+    @SerializedName("id") var id: String? = null,
     @SerializedName("name") var name: String? = null,
     @SerializedName("email") var email: String? = null,
     @SerializedName("username") var username: String? = null,

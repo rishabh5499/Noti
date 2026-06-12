@@ -12,10 +12,13 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 class AppUtils {
     companion object {
@@ -67,11 +70,9 @@ class AppUtils {
             return try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 val date = inputFormat.parse(isoString) ?: return "Edited Today"
-
-                val now = Calendar.getInstance()
-                val target = Calendar.getInstance().apply { time = date }
-
-                val outputFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault()).apply {
+                    timeZone = TimeZone.getDefault()
+                }
                 outputFormat.format(date)
             } catch (e: Exception) {
                 "Edited Today"

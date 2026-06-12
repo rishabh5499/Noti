@@ -1,9 +1,8 @@
-package `in`.vyomsoft.noti.homePage
+package `in`.vyomsoft.noti.homePage.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.R
+import `in`.vyomsoft.noti.homePage.DashboardViewModel
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -43,9 +45,11 @@ fun ProfileSection(
 ) {
     var currentTime by remember { mutableStateOf("") }
     val userDetails by dashboardViewModel.userDetail.observeAsState()
+    val color = AppTheme.colors
 
     LaunchedEffect(Unit) {
         dashboardViewModel.getUserDetails()
+        AppAnalytics.logEvent("Profile_Screen_View")
     }
 
     LaunchedEffect(Unit) {
@@ -67,7 +71,7 @@ fun ProfileSection(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
+                    .background(color.lightGray)
                     .clickable { onProfileClick() },
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_user)
@@ -90,7 +94,7 @@ fun ProfileSection(
                     Text(
                         text = userDetails?.weather?.text ?: "Loading...",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = color.gray
                     )
                 }
             }

@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.auth
+package `in`.vyomsoft.noti.auth.views
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +10,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +22,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -50,10 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import `in`.vyomsoft.noti.Footer
+import `in`.vyomsoft.noti.GA4.AppAnalytics
 import `in`.vyomsoft.noti.Header
 import `in`.vyomsoft.noti.HomeActivity
 import `in`.vyomsoft.noti.apiUtils.Repository
-import `in`.vyomsoft.noti.auth.LoginScreen
 import `in`.vyomsoft.noti.auth.LoginViewModel
 import `in`.vyomsoft.noti.auth.LoginViewModelFactory
 import `in`.vyomsoft.noti.auth.SignupUiState
@@ -61,6 +65,7 @@ import `in`.vyomsoft.noti.auth.SignupViewModel
 import `in`.vyomsoft.noti.auth.SignupViewModelFactory
 import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.requests.SigninRequests
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
 import `in`.vyomsoft.noti.utils.AlertDialog
 import `in`.vyomsoft.noti.utils.AlertDialogState
@@ -73,8 +78,9 @@ class RegisterPage: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        AppAnalytics.logScreenView("register_screen")
 
-        val repository = Repository()
+        val repository = Repository(applicationContext)
 
         val signupFactory = SignupViewModelFactory(repository)
         signupViewModel = ViewModelProvider(this, signupFactory).get(SignupViewModel::class.java)
@@ -102,7 +108,6 @@ class RegisterPage: ComponentActivity() {
                                 }
                             },
                             onRegistrationSuccess = { loginCredentials ->
-                                // Auto login sequentially with captured email & password combinations
                                 loginViewModel.performLogin(loginCredentials)
                             }
                         )
@@ -139,6 +144,7 @@ fun RegisterScreenUI(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val color = AppTheme.colors
 
     val currentUiState by viewModel.uiState.observeAsState(SignupUiState.Idle)
     var dialogState by remember { mutableStateOf(AlertDialogState()) }
@@ -153,7 +159,6 @@ fun RegisterScreenUI(
                 positiveButtonText = "Continue",
                 onPositiveClick = {
                     viewModel.resetUiState()
-                    // Capture data states safely from remember scopes inside this execution block
                     val credentials = LoginRequests(email, password)
                     onRegistrationSuccess(credentials)
                 }
@@ -183,7 +188,7 @@ fun RegisterScreenUI(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(color.white),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Header()
@@ -195,7 +200,7 @@ fun RegisterScreenUI(
             style = TextStyle(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.W700,
-                color = Color.Black
+                color = color.black
             )
         )
 
@@ -203,7 +208,7 @@ fun RegisterScreenUI(
             text = "Create account",
             style = TextStyle(
                 fontSize = 13.sp,
-                color = Color(0x99000000),
+                color = color.textSecondary,
                 fontWeight = FontWeight.W700
             )
         )
@@ -223,7 +228,7 @@ fun RegisterScreenUI(
         Button(
             onClick = { onRegisterClick(name, username, email, password) },
             modifier = Modifier.width(180.dp).height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF434343)),
+            colors = ButtonDefaults.buttonColors(containerColor = color.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
@@ -243,7 +248,7 @@ fun RegisterScreenUI(
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.W700,
-                    color = Color(0x80000000)
+                    color = color.textTertiary
                 )
             )
 
@@ -272,13 +277,16 @@ fun RegisterTextField(
     onValueChange: (String) -> Unit,
     isPassword: Boolean = false
 ) {
+    val color = AppTheme.colors
+    var passwordVisible by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = {
             Text(
                 placeholder,
-                color = Color(0x80000000),
+                color = color.textTertiary,
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W700
@@ -287,10 +295,21 @@ fun RegisterTextField(
         modifier = Modifier.width(280.dp).height(55.dp),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFE5C1C1),
-            focusedContainerColor = Color(0xFFE5C1C1)
+            unfocusedContainerColor = color.pink,
+            focusedContainerColor = color.pink
         ),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        trailingIcon = {
+            if (isPassword) {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        tint = color.textTertiary
+                    )
+                }
+            }
+        }
     )
 }
 

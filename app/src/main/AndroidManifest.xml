@@ -20,35 +20,36 @@
         </activity>
 
         <activity
-            android:name=".auth.LoginScreen"
+            android:name=".auth.views.LoginScreen"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Noti">
         </activity>
 
         <activity
-            android:name=".auth.LandingPage"
+            android:name=".auth.views.LandingPage"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Noti">
         </activity>
 
         <activity
-            android:name=".auth.RegisterPage"
+            android:name=".auth.views.RegisterPage"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Noti">
         </activity>
 
         <activity
-            android:name=".auth.ForgotPasswordActivity"
+            android:name=".auth.views.ForgotPasswordActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Noti">
         </activity>
 
         <activity
-            android:name=".auth.HelpActivity"
+            android:name=".auth.views.HelpActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Noti">

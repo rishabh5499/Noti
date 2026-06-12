@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>show_outage_banner</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>use_custom_message</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>banner_message_generic</key>
+        <value>We are experiencing cloud sync delays. Your entries are safe and will update once connection returns.</value>
+    </entry>
+    <entry>
+        <key>banner_message_custom</key>
+        <value></value>
+    </entry>
+</defaultsMap>
