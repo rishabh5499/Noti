@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.*
 import `in`.vyomsoft.noti.responses.TodoResponse
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import `in`.vyomsoft.noti.utils.constants.NoteAction
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -40,6 +41,7 @@ fun DateDropdown(
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     var currentDate by remember { mutableStateOf("") }
+    val color = AppTheme.colors
 
     val apiFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     val displayFormatter = remember { SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()) }
@@ -67,7 +69,7 @@ fun DateDropdown(
             .wrapContentSize()
             .clickable { showDatePicker = true },
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFD9D9D9),
+        color = color.lightGray,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

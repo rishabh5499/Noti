@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.auth
+package `in`.vyomsoft.noti.auth.views
 
 import android.content.Intent
 import android.os.Bundle
@@ -39,6 +39,10 @@ import `in`.vyomsoft.noti.R
 import `in`.vyomsoft.noti.UserCacheManager
 import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
 import `in`.vyomsoft.noti.apiUtils.Repository
+import `in`.vyomsoft.noti.auth.LoginUtils
+import `in`.vyomsoft.noti.auth.LoginViewModel
+import `in`.vyomsoft.noti.auth.LoginViewModelFactory
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
 import `in`.vyomsoft.noti.utils.AlertDialog
 import `in`.vyomsoft.noti.utils.AlertDialogState
@@ -102,7 +106,7 @@ class LandingPage : ComponentActivity() {
     private fun checkLoginSession() {
         val token = UserCacheManager.get(AUTH_TOKEN)
         if (token != null) {
-            if (LoginUtils.isJwtExpired(token)) {
+            if (LoginUtils.Companion.isJwtExpired(token)) {
                 loginViewModel.performLogout()
                 UserCacheManager.clear()
                 isSessionExpired = true
@@ -123,11 +127,12 @@ fun LandingScreen(
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val color = AppTheme.colors
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFDEBABB))
+            .background(color.pink)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -135,7 +140,7 @@ fun LandingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(110.dp)
-                .background(Color(0xFF434343)),
+                .background(color.primary),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -144,7 +149,7 @@ fun LandingScreen(
                     style = TextStyle(
                         fontFamily = alegreyaScBold,
                         fontSize = 48.sp,
-                        color = Color.White
+                        color = color.white
                     )
                 )
                 Text(
@@ -152,7 +157,7 @@ fun LandingScreen(
                     style = TextStyle(
                         fontFamily = alegreyaScBold,
                         fontSize = 16.sp,
-                        color = Color.White
+                        color = color.white
                     )
                 )
             }
@@ -164,8 +169,8 @@ fun LandingScreen(
             text = stringResource(R.string.why_noti),
             style = TextStyle(
                 fontSize = 36.sp,
-                fontWeight = FontWeight.Black,
-                color = Color(0xFF1A1A1A)
+                fontWeight = FontWeight.W900,
+                color = color.deepBlack
             )
         )
 
@@ -177,7 +182,7 @@ fun LandingScreen(
             style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                color = Color.Black,
+                color = color.black,
                 fontWeight = FontWeight.Medium
             ),
             modifier = Modifier.padding(horizontal = 40.dp)
@@ -190,12 +195,12 @@ fun LandingScreen(
             modifier = Modifier
                 .width(160.dp)
                 .height(55.dp)
-                .border(1.dp, Color.Black, RoundedCornerShape(12.dp)),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5C1C1)),
+                .border(1.dp, color.black, RoundedCornerShape(12.dp)),
+            colors = ButtonDefaults.buttonColors(containerColor = color.pink),
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(stringResource(R.string.login).uppercase(), color = Color(0xFF434343), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.login).uppercase(), color = color.primary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -205,10 +210,10 @@ fun LandingScreen(
             modifier = Modifier
                 .width(160.dp)
                 .height(55.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF434343)),
+            colors = ButtonDefaults.buttonColors(containerColor = color.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(stringResource(R.string.register).uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.register).uppercase(), color = color.white, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -218,7 +223,7 @@ fun LandingScreen(
             style = TextStyle(
                 fontSize = 12.sp,
                 textDecoration = TextDecoration.Underline,
-                color = Color(0xFF434343)
+                color = color.primary
             ),
             modifier = Modifier.clickable {
                 context.startActivity(Intent(context, HelpActivity::class.java))
@@ -235,7 +240,7 @@ fun LandingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(color.lightGray)
             )
 
             Image(

@@ -1,12 +1,107 @@
 package `in`.vyomsoft.noti.ui.theme
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+@Immutable
+data class AppColors(
+    val primary: Color,
+    val onPrimary: Color,
+    val background: Color,
+    val onBackground: Color,
+    val surface: Color,
+    val onSurface: Color,
+    val surfaceVariant: Color,
+    val blue: Color,
+    val black: Color,
+    val green: Color,
+    val textSecondary: Color,
+    val white: Color,
+    val gray: Color,
+    val red: Color,
+    val pink: Color,
+    val deepBlack: Color,
+    val lightGray: Color,
+    val errorContainerColor: Color,
+    val errorContainer: Color,
+    val headingFaded: Color,
+    val errorRed: Color,
+    val errorPink: Color,
+    val emptyNotifBlue: Color,
+    val emptyNotifLightBlue: Color,
+    val cardBorder: Color,
+    val successGreen: Color,
+    val alertTitle: Color,
+    val alertBody: Color,
+    val negativeButtonColor: Color,
+    val textTertiary: Color
+)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-val Green = Color(0xFF4CAF50)
+val LightAppColors = AppColors(
+    primary = Color(0xFF434343),
+    onPrimary = Color.White,
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color(0xFFE5C1C1),
+    blue = Color(0xFF2196F3),
+    green = Color(0xFF4CAF50),
+    textSecondary = Color(0x99000000),
+    white = Color(0xFFFFFFFF),
+    gray = Color(0xFF888888),
+    black = Color(0xFF000000),
+    red = Color(0xFFD32F2F),
+    pink = Color(0xFFDEBABB),
+    deepBlack = Color(0xFF1A1A1A),
+    lightGray = Color(0xFFD9D9D9),
+    errorContainerColor = Color(0xFFF9DEDC),
+    errorContainer = Color(0xFF410E0B),
+    headingFaded = Color(0xFF1D1B20),
+    errorRed = Color(0xFFB71C1C),
+    errorPink = Color(0xFFFEEBEE),
+    emptyNotifBlue = Color(0xFF00668B),
+    emptyNotifLightBlue = Color(0xFFE1F5FE),
+    cardBorder = Color(0xFFE0E0E0),
+    successGreen = Color(0xFF2E7D32),
+    alertTitle = Color(0xFF212121),
+    alertBody = Color(0xFF616161),
+    negativeButtonColor = Color(0xFF757575),
+    textTertiary = Color(0x80000000)
+)
+
+val DarkAppColors = AppColors(
+    primary = Color(0xFF434343),
+    onPrimary = Color.White,
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color(0xFFE5C1C1),
+    blue = Color(0xFF2196F3),
+    green = Color(0xFF4CAF50),
+    textSecondary = Color(0x99000000),
+    white = Color(0xFFFFFFFF),
+    gray = Color(0xFF888888),
+    black = Color(0xFF000000),
+    red = Color(0xFFD32F2F),
+    pink = Color(0xFFDEBABB),
+    deepBlack = Color(0xFF1A1A1A),
+    lightGray = Color(0xFFD9D9D9),
+    errorContainerColor = Color(0xFFF9DEDC),
+    errorContainer = Color(0xFF410E0B),
+    headingFaded = Color(0xFF1D1B20),
+    errorRed = Color(0xFFB71C1C),
+    errorPink = Color(0xFFFEEBEE),
+    emptyNotifBlue = Color(0xFF00668B),
+    emptyNotifLightBlue = Color(0xFFE1F5FE),
+    cardBorder = Color(0xFFE0E0E0),
+    successGreen = Color(0xFF2E7D32),
+    alertTitle = Color(0xFF212121),
+    alertBody = Color(0xFF616161),
+    negativeButtonColor = Color(0xFF757575),
+    textTertiary = Color(0x80000000)
+)
+
+val LocalAppColors = staticCompositionLocalOf { LightAppColors }

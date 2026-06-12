@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.retrofit.v290)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.config)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

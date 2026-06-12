@@ -35,6 +35,7 @@
     <string name="welcome_back">Welcome Back!</string>
     <string name="sign_in_to_continue">Sign in to continue</string>
     <string name="user_name">User Name</string>
+    <string name="user_name_email">User Name/Email</string>
     <string name="forgot_your_password">Forgot your password ?</string>
     <string name="don_t_have_an_account">"Don't have an account? "</string>
     <string name="register_now">Register Now</string>

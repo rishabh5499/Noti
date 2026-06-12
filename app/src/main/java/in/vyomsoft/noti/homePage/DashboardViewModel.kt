@@ -71,6 +71,13 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
                     UserCacheManager.clear()
                     AppAnalytics.logEvent("user_logged_out")
                     Log.d("Signup", "Raw response: $rawText")
+                } else {
+                    UserCacheManager.clear()
+                    _loginResult.postValue(true)
+                    val bundle = Bundle().apply {
+                        putString("error", response.message())
+                    }
+                    AppAnalytics.logEvent("user_logged_out", bundle)
                 }
             }
 

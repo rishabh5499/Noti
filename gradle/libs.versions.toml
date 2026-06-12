@@ -16,6 +16,7 @@ okhttp = "4.12.0"
 runtimeLivedata = "1.11.1"
 googleGmsGoogleServices = "4.4.4"
 firebaseAnalytics = "23.2.0"
+firebaseConfig = "23.1.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -43,6 +44,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit-v290 = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseConfig" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

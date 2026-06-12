@@ -17,27 +17,21 @@ sealed interface TasksUiState {
     object Empty : TasksUiState
     object NetworkError : TasksUiState
     object Success : TasksUiState
-    data class Error(val message: String) : TasksUiState
+    data class Error(val message: String, val errorCode: Int? = null) : TasksUiState
 }
 
 class TasksViewModel(private val repository: Repository) : ViewModel() {
 
-    // Main data stream for the UI
     private val _todoResult = MutableLiveData<List<TodoResponse>>(emptyList())
     val todoResult: LiveData<List<TodoResponse>> = _todoResult
 
     private val _uiState = MutableLiveData<TasksUiState>(TasksUiState.Loading)
     val uiState: LiveData<TasksUiState> = _uiState
 
-    // Pagination State
     private var currentFilteredPage = 0
     private var currentAllPage = 0
     private var isLoading = false
 
-    /**
-     * Fetch tasks filtered by date with pagination.
-     * Appends results to the existing list.
-     */
     fun loadFilteredGroups(date: String?, isRefresh: Boolean = false) {
         if (isLoading) return
 
@@ -91,7 +85,13 @@ class TasksViewModel(private val repository: Repository) : ViewModel() {
                         AppAnalytics.logEvent("Tasks_Error", Bundle().apply {
                             putInt("error_code", response.code())
                         })
-                        _uiState.postValue(TasksUiState.Error("Error Fetching Filtered Tasks"))
+
+                        // Pass the actual server code (e.g., 502) down to the UI layout handler
+                        if (_todoResult.value.isNullOrEmpty()) {
+                            _uiState.postValue(TasksUiState.Error("Server error (${response.code()})", response.code()))
+                        } else {
+                            _uiState.postValue(TasksUiState.Error("Error Fetching Filtered Tasks: ${response.code()}"))
+                        }
                     }
                 }
 
@@ -110,10 +110,6 @@ class TasksViewModel(private val repository: Repository) : ViewModel() {
             })
     }
 
-    /**
-     * Fetch all tasks (Debug implementation) with pagination.
-     * Appends results to the existing list.
-     */
     fun loadAllTodos(isRefresh: Boolean = false) {
         if (isLoading) return
 
@@ -160,7 +156,11 @@ class TasksViewModel(private val repository: Repository) : ViewModel() {
                             _uiState.postValue(TasksUiState.Success)
                         }
                     } else {
-                        _uiState.postValue(TasksUiState.Error("Error fetching all todos"))
+                        if (_todoResult.value.isNullOrEmpty()) {
+                            _uiState.postValue(TasksUiState.Error("Server error (${response.code()})", response.code()))
+                        } else {
+                            _uiState.postValue(TasksUiState.Error("Error fetching all todos"))
+                        }
                     }
                 }
 
@@ -175,9 +175,6 @@ class TasksViewModel(private val repository: Repository) : ViewModel() {
             })
     }
 
-    /**
-     * Resets pagination and clears the list.
-     */
     fun resetPagination() {
         currentFilteredPage = 0
         currentAllPage = 0

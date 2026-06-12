@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.notes
+package `in`.vyomsoft.noti.notes.emptyStateViews
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -56,13 +56,25 @@ fun ErrorNotesScreen(
             "Log In Again",
             onReAuthenticateClick
         )
-        is NotesErrorState.ServerError -> quintetOf(
-            Icons.Outlined.CloudOff,
-            "Server error (${errorState.code})",
-            "Our servers are having a momentary crisis. We're on it!",
-            "Retry Connection",
-            onRetryClick
-        )
+        is NotesErrorState.ServerError -> {
+            if (errorState.code == 502) {
+                quintetOf(
+                    Icons.Outlined.CloudOff,
+                    "Server error (502)",
+                    "Our servers are having a momentary crisis. Please try opening the app again in a few minutes.",
+                    null,
+                    null
+                )
+            } else {
+                quintetOf(
+                    Icons.Outlined.CloudOff,
+                    "Server error (${errorState.code})",
+                    "Our servers are having a momentary crisis. We're on it!",
+                    "Retry Connection",
+                    onRetryClick
+                )
+            }
+        }
         is NotesErrorState.Unknown -> quintetOf(
             Icons.Outlined.ErrorOutline,
             "Something went wrong",
@@ -118,23 +130,25 @@ fun ErrorNotesScreen(
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            if (buttonText != null && onButtonClick != null) {
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = onButtonClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (errorState is NotesErrorState.Unauthorized401)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.error
-                ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                Text(text = buttonText)
+                Button(
+                    onClick = onButtonClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (errorState is NotesErrorState.Unauthorized401)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.error
+                    ),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
+                    Text(text = buttonText)
+                }
             }
         }
     }
 }
 
-private data class Quintet<A, B, C, D, E>(val first: A, val second: B, val third: C, val fourth: D, val fifth: E)
-private fun <A, B, C, D, E> quintetOf(a: A, b: B, c: C, d: D, e: E) = Quintet(a, b, c, d, e)
+private data class Quintet<A, B, C, D, E>(val first: A, val second: B, val third: C, val fourth: D?, val fifth: E?)
+private fun <A, B, C, D, E> quintetOf(a: A, b: B, c: C, d: D?, e: E?) = Quintet(a, b, c, d, e)

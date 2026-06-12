@@ -6,33 +6,24 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.ImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import `in`.vyomsoft.noti.Utils.Companion.alegreyaScBold
 import `in`.vyomsoft.noti.apiUtils.Repository
-import `in`.vyomsoft.noti.auth.LandingPage
-import `in`.vyomsoft.noti.auth.LoginScreen
+import `in`.vyomsoft.noti.auth.views.LandingPage
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -87,6 +78,7 @@ class SplashActivity : ComponentActivity() {
 @Composable
 fun SplashScreenContent() {
     val context = LocalContext.current
+    val color = AppTheme.colors
 
     // Configure Coil to handle GIFs
     val imageLoader = ImageLoader.Builder(context)
@@ -102,7 +94,7 @@ fun SplashScreenContent() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF000000)),
+            .background(color.black),
         contentAlignment = Alignment.Center
     ) {
         Column(

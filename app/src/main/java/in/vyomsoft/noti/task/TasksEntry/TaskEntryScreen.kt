@@ -27,6 +27,7 @@ import `in`.vyomsoft.noti.requests.TodoRequest
 import `in`.vyomsoft.noti.responses.TodoResponse
 import kotlinx.coroutines.launch
 import `in`.vyomsoft.noti.R
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,7 @@ fun TaskEntryScreen(
     val uiState by viewModel.uiState.collectAsState()
     val updatedTodoResult by viewModel.updatedTodoResult.collectAsState()
     val isOnline by viewModel.isOnline.collectAsState()
+    val color = AppTheme.colors
 
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -100,7 +102,7 @@ fun TaskEntryScreen(
                 text = { Text(stringResource(R.string.this_action_cannot_be_undone)) },
                 confirmButton = {
                     TextButton(onClick = { viewModel.deleteTodo(state.taskId) }) {
-                        Text(stringResource(R.string.delete), color = Color.Red)
+                        Text(stringResource(R.string.delete), color = color.red)
                     }
                 },
                 dismissButton = {
@@ -129,7 +131,7 @@ fun TaskEntryScreen(
                     if (groupId.isNotBlank()) {
                         IconButton(onClick = { viewModel.startDelete(groupId.toInt()) }) {
                             Icon(Icons.Default.Delete,
-                                stringResource(R.string.delete_group), tint = Color.Red)
+                                stringResource(R.string.delete_group), tint = color.red)
                         }
                     }
                 }
@@ -179,7 +181,7 @@ fun TaskEntryScreen(
                     Text(
                         text = stringResource(R.string.tasks_offline_desc),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        color = color.errorContainer,
                         modifier = Modifier.padding(12.dp)
                     )
                 }
@@ -196,7 +198,7 @@ fun TaskEntryScreen(
             )
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text("Sub-Tasks", fontWeight = FontWeight.Bold, color = Color.Gray)
+            Text("Sub-Tasks", fontWeight = FontWeight.Bold, color = color.gray)
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn(
@@ -229,7 +231,7 @@ fun TaskEntryScreen(
                                 val isInitiallyCompleted = remember(dismissState.currentValue == SwipeToDismissBoxValue.Settled) {
                                     task.completed
                                 }
-                                val color = if (isInitiallyCompleted) Color.Gray else Color.Green
+                                val color = if (isInitiallyCompleted) color.gray else color.green
                                 val label = if (isInitiallyCompleted) stringResource(R.string.mark_incomplete) else stringResource(R.string.mark_complete)
 
                                 Box(
@@ -239,12 +241,12 @@ fun TaskEntryScreen(
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
-                                    Text(text = label, color = Color.White, fontWeight = FontWeight.Bold)
+                                    Text(text = label, color = AppTheme.colors.white, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
                     ) {
-                        Box(modifier = Modifier.background(Color.White, RoundedCornerShape(8.dp))) {
+                        Box(modifier = Modifier.background(color.white, RoundedCornerShape(8.dp))) {
                             TaskInputRow(
                                 value = task.name ?: "",
                                 isCompleted = task.completed,
@@ -295,6 +297,7 @@ fun TaskInputRow(
     onAddLine: () -> Unit,
     onRemoveLine: () -> Unit
 ) {
+    val colors = AppTheme.colors
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -313,7 +316,7 @@ fun TaskInputRow(
             modifier = Modifier.weight(1f),
             textStyle = TextStyle(
                 textDecoration = if (isCompleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
-                color = if (isCompleted) Color.Gray else Color.Black
+                color = if (isCompleted) colors.gray else colors.black
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -324,9 +327,9 @@ fun TaskInputRow(
         )
 
         if (value.isNotBlank()) {
-            IconButton(onClick = onAddLine) { Icon(Icons.Default.AddCircle, null, tint = Color.Blue) }
+            IconButton(onClick = onAddLine) { Icon(Icons.Default.AddCircle, null, tint = colors.blue) }
         }
-        IconButton(onClick = onRemoveLine) { Icon(Icons.Default.Delete, null, tint = Color.LightGray) }
+        IconButton(onClick = onRemoveLine) { Icon(Icons.Default.Delete, null, tint = colors.lightGray) }
     }
 }
 

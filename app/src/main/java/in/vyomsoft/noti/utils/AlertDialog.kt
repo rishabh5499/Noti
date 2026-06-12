@@ -19,18 +19,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 
 @Composable
 fun AlertDialog(
     state: AlertDialogState,
     onDismissRequest: () -> Unit
 ) {
+    val color = AppTheme.colors
     if (!state.isOpen) return
 
     val themeColor = when (state.type) {
-        AlertMessageType.ERROR -> Color(0xFFD32F2F)  // Crimson Red
-        AlertMessageType.SUCCESS -> Color(0xFF2E7D32) // Deep Emerald Green
-        AlertMessageType.GENERAL -> Color(0xFF434343) // Your Dark Charcoal Theme Color
+        AlertMessageType.ERROR -> color.red
+        AlertMessageType.SUCCESS -> color.successGreen
+        AlertMessageType.GENERAL -> color.primary
     }
 
     val icon = when (state.type) {
@@ -48,7 +50,7 @@ fun AlertDialog(
                 .fillMaxWidth(0.85f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(24.dp),
-            color = Color.White,
+            color = color.white,
             tonalElevation = 6.dp
         ) {
             Column(
@@ -79,7 +81,7 @@ fun AlertDialog(
                     text = state.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF212121),
+                    color = color.alertTitle,
                     textAlign = TextAlign.Center
                 )
 
@@ -89,7 +91,7 @@ fun AlertDialog(
                 Text(
                     text = state.message,
                     fontSize = 15.sp,
-                    color = Color(0xFF616161),
+                    color = color.alertBody,
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp,
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -119,7 +121,7 @@ fun AlertDialog(
                             text = state.positiveButtonText.uppercase(),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = color.white
                         )
                     }
 
@@ -136,7 +138,7 @@ fun AlertDialog(
                                 text = state.negativeButtonText,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF757575)
+                                color = color.negativeButtonColor
                             )
                         }
                     }

@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.notes.NotesEntry
+package `in`.vyomsoft.noti.notes.NotesEntry.view
 
 import NoteUiState
 import androidx.compose.animation.AnimatedVisibility
@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import `in`.vyomsoft.noti.notes.NotesEntry.NotesEntryViewModel
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import `in`.vyomsoft.noti.utils.AlertDialog
 import `in`.vyomsoft.noti.utils.AlertDialogState
 import `in`.vyomsoft.noti.utils.AlertMessageType
@@ -32,6 +34,7 @@ fun NoteEntryScreen(
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var createdAt by remember { mutableStateOf("") }
+    val color = AppTheme.colors
 
     val uiState by viewModel.uiState.collectAsState()
     val updatedNoteResult by viewModel.updatedNoteResult.collectAsState()
@@ -156,7 +159,7 @@ fun NoteEntryScreen(
             ) {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
+                        containerColor = color.errorContainerColor
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -165,7 +168,7 @@ fun NoteEntryScreen(
                     Text(
                         text = "You're viewing this note offline. Changes cannot be synchronized right now.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        color = color.errorContainer,
                         modifier = Modifier.padding(12.dp)
                     )
                 }
@@ -180,13 +183,13 @@ fun NoteEntryScreen(
                     Text(
                         text = "Title",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = Color.LightGray
+                        color = color.lightGray
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = color.headingFaded
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -202,7 +205,7 @@ fun NoteEntryScreen(
             Text(
                 text = createdAt,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
+                color = color.gray,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -215,7 +218,7 @@ fun NoteEntryScreen(
                     Text(
                         text = "Start typing...",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.LightGray
+                        color = color.lightGray
                     )
                 },
                 modifier = Modifier

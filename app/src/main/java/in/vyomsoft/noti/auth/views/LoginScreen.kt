@@ -1,4 +1,4 @@
-package `in`.vyomsoft.noti.auth
+package `in`.vyomsoft.noti.auth.views
 
 import android.content.Intent
 import android.os.Bundle
@@ -18,8 +18,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -36,9 +42,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,12 +57,14 @@ import `in`.vyomsoft.noti.HomeActivity
 import `in`.vyomsoft.noti.R
 import `in`.vyomsoft.noti.Utils.Companion.inter
 import `in`.vyomsoft.noti.apiUtils.Repository
+import `in`.vyomsoft.noti.auth.LoginViewModel
+import `in`.vyomsoft.noti.auth.LoginViewModelFactory
 import `in`.vyomsoft.noti.requests.LoginRequests
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 import `in`.vyomsoft.noti.ui.theme.NotiTheme
 import `in`.vyomsoft.noti.utils.AlertDialog
 import `in`.vyomsoft.noti.utils.AlertDialogState
 import `in`.vyomsoft.noti.utils.AlertMessageType
-import kotlin.jvm.java
 
 class LoginScreen : ComponentActivity() {
     private lateinit var loginViewModel: LoginViewModel
@@ -136,13 +144,14 @@ fun LoginScreenUI(
     onRegisterClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val color = AppTheme.colors
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(color.white),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Header()
@@ -154,14 +163,14 @@ fun LoginScreenUI(
             style = TextStyle(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.W700,
-                color = Color.Black
+                color = color.black
             )
         )
         Text(
             text = stringResource(R.string.sign_in_to_continue),
             style = TextStyle(
                 fontSize = 13.sp,
-                color = Color(0x99000000),
+                color = color.textSecondary,
                 fontWeight = FontWeight.W700
             )
         )
@@ -171,9 +180,11 @@ fun LoginScreenUI(
         LoginTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = stringResource(R.string.user_name)
+            placeholder = stringResource(R.string.user_name_email)
         )
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Custom reusable component now natively supports toggleable password masks
         LoginTextField(
             value = password,
             onValueChange = { password = it },
@@ -193,7 +204,7 @@ fun LoginScreenUI(
                 },
             style = TextStyle(
                 fontSize = 14.sp,
-                color = Color(0x80000000),
+                color = color.textTertiary,
                 fontWeight = FontWeight.Bold
             )
         )
@@ -205,13 +216,14 @@ fun LoginScreenUI(
             modifier = Modifier
                 .width(180.dp)
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF434343)),
+            colors = ButtonDefaults.buttonColors(containerColor = color.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
                 text = stringResource(R.string.login_normal_case),
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = color.white
             )
         }
 
@@ -225,14 +237,15 @@ fun LoginScreenUI(
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.W700,
-                    color = Color(0x80000000)
+                    color = color.textTertiary
                 )
             )
             Text(
                 text = stringResource(R.string.register_now),
                 style = TextStyle(
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.W700
+                    fontWeight = FontWeight.W700,
+                    color = color.primary
                 ),
                 textDecoration = TextDecoration.Underline
             )
@@ -251,6 +264,10 @@ fun LoginTextField(
     placeholder: String,
     isPassword: Boolean = false
 ) {
+    val color = AppTheme.colors
+    // Local visibility toggle state specifically for password layout variants
+    var passwordVisible by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -260,7 +277,8 @@ fun LoginTextField(
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W700,
-                fontFamily = inter
+                fontFamily = inter,
+                color = color.textSecondary
             )
         },
         modifier = Modifier
@@ -268,17 +286,34 @@ fun LoginTextField(
             .height(55.dp),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFE5C1C1),
-            focusedContainerColor = Color(0xFFE5C1C1),
-            unfocusedBorderColor = Color.Gray,
-            focusedBorderColor = Color.Black
+            unfocusedContainerColor = color.pink,
+            focusedContainerColor = color.pink,
+            unfocusedBorderColor = color.gray,
+            focusedBorderColor = color.black,
+            focusedTextColor = color.black,
+            unfocusedTextColor = color.black
         ),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
+        // Switch between true text values or star filters on the fly
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
+        trailingIcon = if (isPassword) {
+            {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        tint = color.textSecondary
+                    )
+                }
+            }
+        } else null
     )
 }
 
 @Preview
 @Composable
 fun previewLogin() {
-    LoginScreen()
+    NotiTheme {
+        LoginScreenUI()
+    }
 }

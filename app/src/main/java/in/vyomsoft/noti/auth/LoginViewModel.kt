@@ -43,11 +43,23 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
                     AppAnalytics.logEvent("Login_Success")
                     UserCacheManager.put(AUTH_TOKEN, "$BEARER$token")
                 } else {
+                    // Read the actual JSON error string from the error body
+                    val errorJsonString = response.errorBody()?.string()
+                    val serverErrorMessage = try {
+                        if (!errorJsonString.isNullOrEmpty()) {
+                            org.json.JSONObject(errorJsonString).getString("message")
+                        } else {
+                            response.message()
+                        }
+                    } catch (e: Exception) {
+                        response.message() // Fallback to raw HTTP message if parsing fails
+                    }
+
                     val bundle = Bundle().apply {
-                        putString("error_message", response.message())
+                        putString("error_message", serverErrorMessage)
                     }
                     AppAnalytics.logEvent("Login_Failure", bundle)
-                    _error.postValue("Login failed: ${response.message()}")
+                    _error.postValue(serverErrorMessage)
                 }
             }
 

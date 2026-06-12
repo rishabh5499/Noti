@@ -1,6 +1,8 @@
 package `in`.vyomsoft.noti.apiUtils
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.requests.PasswordDetailsRequest
 import `in`.vyomsoft.noti.requests.SigninRequests
@@ -27,6 +29,7 @@ import retrofit2.Callback
 
 class Repository(val context: Context) {
 
+//    val BASE_URL = "http://192.168.0.6:8080/"
     val BASE_URL = "https://noti.vyomsoft.in/"
     val URL_IMGBB = "https://api.imgbb.com"
 
@@ -64,6 +67,7 @@ class Repository(val context: Context) {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getAllTimeFilteredGroups(
         page: Int = 0,
         size: Int = 10,

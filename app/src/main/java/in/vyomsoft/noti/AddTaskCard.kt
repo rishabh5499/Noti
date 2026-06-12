@@ -15,19 +15,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import `in`.vyomsoft.noti.ui.theme.AppTheme
 
 @Composable
 fun AddTaskCard(
     text: String,
     onAddClick: () -> Unit
 ) {
+    val color = AppTheme.colors
     OutlinedCard(
         onClick = onAddClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Color.LightGray),
+        border = BorderStroke(1.dp, color.textSecondary),
         colors = CardDefaults.outlinedCardColors(
             containerColor = Color.Transparent
         )
@@ -38,7 +40,7 @@ fun AddTaskCard(
         ) {
             Text(
                 text = text,
-                color = Color.Gray,
+                color = color.gray,
                 fontWeight = FontWeight.Bold
             )
         }

@@ -1,5 +1,7 @@
 package `in`.vyomsoft.noti.apiUtils
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import `in`.vyomsoft.noti.requests.LoginRequests
 import `in`.vyomsoft.noti.requests.PasswordDetailsRequest
 import `in`.vyomsoft.noti.requests.ResetPasswordRequest
@@ -27,6 +29,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.time.ZoneId
 
 interface ApiUtils {
     @Headers("Content-Type: application/json")
@@ -69,6 +72,7 @@ interface ApiUtils {
     @GET("notes")
     fun getAllNotes(@Header("Authorization") token: String?): Call<List<NotesResponse>>
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Headers("Content-Type: application/json")
     @GET("todos/date")
     fun getAllTimeFilteredGroupsForUser(
@@ -76,6 +80,7 @@ interface ApiUtils {
         @Query("date") date: String? = null,
         @Query("pageNo") pageNo: Int,
         @Query("pageSize") pageSize: Int,
+        @Query("timezone") timezone: String = ZoneId.systemDefault().id
     ): Call<List<TodoResponse>>
 
     @Headers("Content-Type: application/json")
